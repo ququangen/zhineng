@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手机平板 一台起发</title>
+<meta property="og:title" content="手机平板 一台起发">
+<meta property="og:image" content="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/KVkObLJsnoNPgLxMZKGcgE9Qn6g">
+<meta property="og:description" content="扫码输入型号，秒查当天价">
+<link rel="apple-touch-icon" href="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/KVkObLJsnoNPgLxMZKGcgE9Qn6g">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23145c53'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cline x1='19' y1='19' x2='25' y2='25' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#12211f; --ink-2:#4a5c58; --ink-3:#8b9a96;
+  --bg:#f5f7f6; --card:#ffffff; --line:#e2e8e6;
+  --brand:#145c53; --brand-soft:#e4f0ed; --accent:#b4763a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px; line-height:1.5;
+}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 96px}
+/* 顶部 */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:6px 2px 12px}
+.title{font-size:20px;font-weight:700;letter-spacing:.5px}
+.sub{font-size:12px;color:var(--ink-3);margin-top:2px}
+.total{font-size:12px;color:var(--brand);background:var(--brand-soft);padding:5px 10px;border-radius:999px;white-space:nowrap}
+/* 搜索 */
+.searchbox{position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 0 10px;margin:0 -14px;padding-left:14px;padding-right:14px}
+.field{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:0 12px;height:52px;transition:border-color .15s}
+.field:focus-within{border-color:var(--brand)}
+.field svg{flex:none;width:20px;height:20px;stroke:var(--ink-3);fill:none;stroke-width:2}
+input[type=search]{
+  flex:1;border:0;outline:0;background:transparent;font-size:16px;color:var(--ink);
+  padding:0;min-width:0;font-family:inherit;
+}
+input[type=search]::-webkit-search-cancel-button{display:none}
+.clear{flex:none;border:0;background:#eef2f1;color:var(--ink-2);width:26px;height:26px;border-radius:50%;font-size:15px;line-height:1;cursor:pointer;display:none}
+.clear.show{display:block}
+/* 行情提示卡片 */
+.hint-card{margin-top:8px;background:var(--brand-soft);border:1px solid #cfe3dd;border-radius:12px;padding:10px 12px;display:none}
+.hint-card.show{display:block}
+.hc-top{color:var(--brand);font-weight:600;font-size:13px}
+.hc-price{margin-top:4px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hc-price .ref{color:var(--ink-3);text-decoration:line-through;font-size:13px}
+.hc-price .num{font-size:19px;font-weight:700;color:var(--accent)}
+.hc-model{color:var(--ink-2);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hc-save{margin-top:3px;font-size:12.5px;color:var(--brand);display:none}
+.hc-save b{color:var(--accent)}
+.hc-note{margin-top:4px;color:var(--ink-3);font-size:11.5px}
+/* 分类 / 排序 */
+.row{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:13px;padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.sort{margin-left:auto;flex:none;border:1px dashed var(--line);background:transparent;color:var(--ink-2);font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.sub-row{display:flex;align-items:center;gap:8px;margin-top:3px}
+.range-sel{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:12px;padding:3px 8px;border-radius:8px;cursor:pointer;font-family:inherit;outline:0}
+/* 列表 */
+.list{background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.list-wrap{padding-bottom:96px}
+.item{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid #f1f4f3;cursor:pointer}
+.item:last-child{border-bottom:0}
+.item:active{background:#f7faf9}
+.item-main{min-width:0;flex:1}
+.model{font-size:15px;word-break:break-word;line-height:1.35}
+.model mark{background:#fff0c9;color:inherit;padding:0 1px;border-radius:2px}
+.cat{font-size:12px;color:var(--ink-3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{flex:none;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand)}
+.price small{font-size:11px;font-weight:500;color:var(--ink-3);margin-left:2px}
+.price .was{font-size:11.5px;font-weight:500;color:var(--ink-3);text-decoration:line-through;margin-right:5px}
+.empty{padding:44px 20px;text-align:center;color:var(--ink-3);font-size:14px;line-height:1.8}
+.more{padding:12px;text-align:center;color:var(--ink-3);font-size:12px;background:var(--card);border-radius:12px;margin-top:8px}
+/* 底部栏 */
+.bar{position:fixed;left:0;right:0;bottom:0;padding:6px 14px calc(6px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,rgba(245,247,246,0))}
+.bar{padding-right:92px}
+.bar-in{align-items:center;
+max-width:680px;margin:0 auto;display:flex;gap:8px}
+.btn{flex:1;border:0;border-radius:13px;padding:13px 6px;font-size:13.5px;letter-spacing:-0.2px;white-space:nowrap;font-family:inherit;cursor:pointer;background:var(--brand);color:#fff;font-weight:600}
+.btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+/* 弹层 */
+.sheet{position:fixed;inset:0;z-index:30;display:none}
+.sheet.show{display:block}
+.mask{position:absolute;inset:0;background:rgba(18,33,31,.45)}
+.panel{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto;max-width:720px;margin:0 auto}
+.panel h3{margin:0 0 4px;font-size:17px}
+.hint{font-size:12.5px;color:var(--ink-3);line-height:1.7;margin:0 0 12px}
+textarea{width:100%;height:150px;resize:vertical;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:0}
+textarea:focus{border-color:var(--brand)}
+.file{display:block;margin:10px 0 4px;font-size:13px;color:var(--ink-2)}
+.foot-note{font-size:12px;color:var(--ink-3);margin-top:14px;line-height:1.7}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:rgba(18,33,31,.9);color:#fff;font-size:13.5px;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:40;max-width:80vw;text-align:center}
+.toast.show{opacity:1}
+.hist{display:none;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 0}
+.hist-lb{font-size:12.5px;color:var(--ink-3)}
+.hist-chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink-2);font-family:inherit;font-size:13px;padding:6px 12px;border-radius:999px;cursor:pointer;max-width:45vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-chip:active{background:#eef3f2}
+.hist-clear{border:0;background:none;color:var(--ink-3);font-family:inherit;font-size:12.5px;padding:6px 4px;cursor:pointer;text-decoration:underline}
+.share-btn{border:1.5px solid var(--line);background:var(--card);color:var(--ink-2);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:999px;cursor:pointer;margin-left:8px;flex:none}
+.share-btn:active{background:#eef3f2}
+@media(min-width:640px){
+  .wrap{padding:20px 20px 100px}
+  .title{font-size:24px}
+}
+
+/* ---------- 访问口令 ---------- */
+.gate{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gate.on{display:flex}
+.gate-box{width:100%;max-width:340px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;text-align:center}
+.gate-title{font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-0.3px}
+.gate-sub{font-size:12.5px;color:var(--ink-3);margin-top:8px;line-height:1.6}
+.gate-in{width:100%;height:44px;margin-top:16px;border:1.5px solid var(--line);border-radius:11px;padding:0 12px;font-size:16px;text-align:center;color:var(--ink);background:#fff;font-family:inherit}
+.gate-in:focus{outline:none;border-color:var(--brand)}
+.gate-btn{width:100%;height:44px;margin-top:12px;border:0;border-radius:11px;background:var(--brand);color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+.gate-err{font-size:12.5px;color:#C0392B;margin-top:10px;min-height:18px}
+.gate-note{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.6}
+
+</style>
+</head>
+<body>
+<img src="https://media.doubao.com/space/api/box/stream/download/all_by_mount_point/KVkObLJsnoNPgLxMZKGcgE9Qn6g" alt="手机平板报价" style="position:fixed;left:0;top:0;width:60px;height:60px;opacity:0.02;pointer-events:none;z-index:0">
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="title"></div>
+      <div class="sub-row"><div class="sub" id="subline"></div>
+        <select id="rangeSel" class="range-sel">
+          <option value="all">预算价查询</option>
+          <option value="lt1000">1000元以下</option>
+          <option value="mid">1000～2000元</option>
+          <option value="mid">2000～3000元</option>
+          <option value="mid">3000～4000元</option>
+          <option value="mid">4000～5000元</option>
+          <option value="gt5000">5000元以上</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <div class="total" id="total">—</div>
+      <button class="share-btn" id="shareBtn">分享</button>
+    </div>
+  </div>
+
+  <div class="searchbox">
+    <div class="field">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-linecap="round"></line></svg>
+      <input type="search" id="q" placeholder="输入型号，如 Y500、X500、iQOO Z10" autocomplete="off">
+      <button class="clear" id="clearBtn" aria-label="清空">×</button>
+    </div>
+    <div class="hint-card" id="priceHint">
+      <div class="hc-top" id="hcTop"></div>
+      <div class="hc-price"><span class="ref" id="hcRef"></span><span class="num" id="hcPrice"></span><span class="hc-model" id="hcModel"></span></div>
+      <div class="hc-save" id="hcSave"></div>
+      <div class="hc-note">官网价为本平台参考价，未激活机型行情浮动，以店内实时报价为准。</div>
+    </div>
+    <div class="row" id="cats"></div>
+    <div class="hist" id="hist"></div>
+  </div>
+
+  <div class="list-wrap"><div class="list" id="list"></div></div>
+  <div class="more" id="more" style="display:none"></div>
+
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <button class="btn" id="updateBtn" style="flex:0 0 92px;height:30px;padding:0 10px;font-size:12.5px;border-radius:8px;background:#BAC4BF;color:#FFFFFF;border:1px solid #AFBAB5;font-weight:600">数据维护</button>
+    <button class="btn" id="copyBtn" style="height:30px;padding:0 10px;font-size:13px;border-radius:8px">复制搜索结果</button>
+  </div>
+</div>
+
+<div class="sheet" id="shareSheet">
+  <div class="mask" data-close></div>
+  <div class="panel">
+    <h3>分享查询工具</h3>
+    <p class="hint">方式一：直接保存下面这张二维码图，发微信给同事扫码。</p>
+    <div style="text-align:center;margin:6px 0 14px">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyCAIAAABnRsZeAAAGe0lEQVR42u3cTa7UMBCFURplAayHEUtnxHrYgZkhMYma53dV5co58/6J0/3JkUp+rbW+AHyer5YAkBVAVgBZAZAVQFYAWQGQFUBWAFkBkBVAVgBZAWQFQFYAWQFkBUBWAFkB5rl2Xvztx/dhy/H7568PX+/9a6tWsue36nlF89aqap3tVgAPQYCsALICICuArACyAiArgKwAA1y5t96Z0supmoY0ofv+O+9c0bzJ4BP/C3YrgKwAsgLICoCsALICyAqArACyAgxwVX1wz9nQnXeumqOtmuDs+a127lHVFZ34X7BbAWQFkBUAWQFkBZAVQFYAZAWQFWC8yxK8L3c+a9UE59PmhnNn6GK3AsgKICuArADICiArgKwAyAogK8Awpmz/w4nns1Z97v1re14RdiuArACyAiArgKwAsgIgK4CsALIC8FfZlO28ecfcqbE91zl3RVUn7PacorZbAZAVQFYAWQFkBUBWAFkBZAVAVoASwSnb3ORoldwc7bzX3nva9c77L9itALICyAqArACyAsgKICsAsgLICjDea61lFd5UdeJsbvoztxonzrPOO1PWbgWQFQBZAWQFkBVAViwBICuArACyAvBhW2fZ5uYs7+Xeeedze6q6R7m7UPXOPeeGq/5ldiuAhyBAVgBkBZAVQFYAWQGQFUBWgPGcZfuP3ARnTm7298T5zp7nDZ/4zqZsAQ9BgKwAyAogK4CsAMgKICuArAAP5yzb4985d4+qZjR3VK1z7h6deL12K4CsALICyAqArACyAsgKgKwAsgIMEDzLtmoKM/e5J550uyO3VifO71ZdUdXv2Vm2gIcgQFYAZAWQFUBWAGQFkBVAVoCHa3qW7c6E34mnme6omjrN/XJ6/iZz96hqNexWAA9BgKwAyAogK4CsAMgKICuArADcuHJvvTPhVzXvmLve3JmjJ551+jQnzv7arQAeggBZAZAVQFYAWQGQFUBWAFkBHu611vrwi6vmO6vkpiGrZn97qprf7TkL23Ot7FYAWQFkBUBWAFkBZAWQFQBZAWQFGG9ryran3Kxkz3Nhn3aWbdX9rTpTtuf0tt0KICuArADICiArgKwAsgIgK4CsAONdOy+umv+rmpXseb25OzjvNOKq73zi7K/dCiArgKwAyAogK4CsAMgKICuArAAPN/As255OPBc2x4nCn3UXep6Da7cCeAgCZAWQFQBZAWQFkBUAWQFkBRggOGV74gmdPSc4dz63Ss/r7Tnd2/M7260AHoIAWQGQFUBWAFkBkBVAVgBZAR7umndJVZOy5mg7fG7VWp14lm3uDtqtALICyAogKwCyAsgKICsAsgLICjBA8Czbe7mpxJ5zh7lJynmfu6NqnrXqn1K1knYrgIcgQFYAZAWQFUBWAFkBkBVAVoDxts6yPfEMzqpZydxqVL1zT7krqprPrpo4t1sBPAQBsgIgK4CsALICICuArACyAjzc1pTt0073PFHPKcx5v5x5Z/farQAeggBZAZAVQFYAWQGQFUBWAFkBHu7KvfXOfGfVSbe5663S84zV3Om8VauR+y+cOOtstwLICiArgKwAyAogK4CsAMgKICvAAFtTtj2nXXe+c05ukrLnO1fNSfecZ+35m7RbAWQFkBUAWQFkBZAVAFkBZAWQFYAbr7WWVXhT1QmsPa9o53qrJnR73sF5vyu7FUBWAFkBZAVAVgBZAWQFQFYAWQEGCJ5le6KdmcWqecenzf6eeB7tib8ruxVAVgBZAZAVQFYAWQGQFUBWAFkBHm7rLNvcZGHOiROcOyvp/N0Od6HqinKnAtutAB6CAFkBkBVAVgBZAWQFQFYAWQHGu6o+uGqyMPfOVTPHJ37uiacg95zuvf9WVb8NuxVAVgBZAWQFQFYAWQFkBUBWAFkBBrgswft25iznzeDmZo57zu/mThTO3YWqb2W3AngIAmQFkBUAWQFkBZAVAFkBZAUYwJTtp8lNf/acOq2aZ83NhubuUc7OajjLFvAQBMgKgKwAsgLICoCsALICyArAjbIp29yEX9V3PnHqtOd3rlqNe7l1zq1G7orsVgAPQYCsAMgKICuArACyAiArgKwA4wWnbKtO96y6otzc8IkreeIcbc8Z3NxrnWULeAgCZAVAVgBZAWQFQFYAWQFkBeDGa61lFQC7FUBWAFkBkBVAVgBZAZAVQFYAWQGQFUBWAFkBZAVAVgBZAWQFQFYAWQFkBeDOH6fI8ceMwUvLAAAAAElFTkSuQmCC" alt="查询工具二维码" style="width:200px;height:auto;border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff">
+      <div style="font-size:12.5px;color:var(--ink-3);margin-top:6px">长按这张图即可保存到相册</div>
+    </div>
+    <p class="hint">方式二：复制链接，粘贴到微信发送。</p>
+    <input type="text" id="shareUrl" readonly style="width:100%;font-size:14px;border:1.5px solid var(--line);border-radius:12px;padding:12px;color:var(--ink);background:#f6f8f8;font-family:inherit">
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn ghost" id="copyLinkBtn" style="padding:12px;font-size:14px">再复制一次</button>
+      <button class="btn" data-close style="padding:12px;font-size:14px">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="mask" data-close></div>
+  <div class="panel">
+    <h3>更新报价数据</h3>
+    <p class="hint">两种方式任选：<br>① 上传 Excel / CSV 文件；<br>② 在 Excel 里选中表格复制，粘贴到下框。<br>格式为三列：分类、型号、金额；也可加第四列「官网价」，页面会以划线价展示（不填则不显示）。更新后的数据只保存在本机浏览器。</p>
+    <div style="margin:12px 0 6px;font-size:13px;font-weight:600;color:var(--ink)">在线数据地址（可选）</div>
+    <div class="field" style="height:auto;padding:8px 10px;margin-bottom:6px;display:block">
+      <input type="url" id="urlInput" placeholder="https://raw.githubusercontent.com/你的用户名/仓库名/main/data.csv" style="font-size:14px;color:var(--ink);width:100%;min-width:0;text-overflow:ellipsis">
+    </div>
+    <div class="bar-in" style="margin-bottom:6px;flex-wrap:wrap;gap:6px">
+      <button class="btn ghost" id="fillUrlBtn" style="padding:10px;font-size:14px;margin-bottom:8px">一键填入官方数据地址</button>
+      <button class="btn ghost" id="saveUrlBtn" style="padding:10px;font-size:14px">保存地址并同步</button>
+      <button class="btn ghost" id="clearUrlBtn" style="padding:10px;font-size:14px">清除地址</button>
+    </div>
+    <div class="hint" style="margin-bottom:10px">填写后，这个网页每次打开都会从这个地址拉取最新报价；读取失败会自动用内置数据。</div>
+    <input type="file" class="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt">
+    <textarea id="pasteArea" placeholder="粘贴示例（从 Excel 复制即为制表符分隔）：&#10;vivo Y系列	Y500 (12+256)	1599"></textarea>
+    <div class="bar-in" style="margin-top:12px">
+      <button class="btn ghost" id="resetBtn">恢复内置数据</button>
+      <button class="btn" id="applyBtn">导入粘贴内容</button>
+    </div>
+    <div class="foot-note" id="dataInfo">数据来源：内置报价（2026-11-11）。</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script defer src="https://fastly.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<div class="gate on" id="gate">
+  <div class="gate-box">
+    <div class="gate-title" id="gateTitle">请输入查询口令</div>
+    <div class="gate-sub" id="gateSub">口令由发给你的业务员提供</div>
+    <input class="gate-in" id="gatePwd" type="password" inputmode="numeric" autocomplete="off" maxlength="16" placeholder="输入口令">
+    <button class="gate-btn" id="gateBtn">进入报价</button>
+    <div class="gate-err" id="gateErr"></div>
+    <div class="gate-note" id="gateNote">连续输错 3 次将锁定 10 分钟</div>
+  </div>
+</div>
+
+<script>
+/* ====== 内置数据（分类, 型号, 金额） ====== */
+const RAW_DATA = [["VIVO","Y600 8+256",2124,2499,"开封"],["VIVO","Y600 6+256",1869,2199,"开封"],["VIVO","Y600 6+128",1699,1999,"开封"],["VIVO","Y60e 6+256",1869,2199,"开封"],["VIVO","Y60e 4+256",1699,1999,"开封"],["VIVO","Y60e 6+128",1699,1999,"开封"],["VIVO","Y600i 6+256",1699,1999,"开封"],["VIVO","Y60e 4+128",1444,1699,"开封"],["VIVO","vivo Pad6 Pro (16+512)平板",6699,0,"开封"],["VIVO","vivo Pad6 Pro (12+512)平板",5299,5799,"开封"],["VIVO","vivo Pad6 Pro (12+256)平板",4499,4999,"开封"],["VIVO","vivo Pad6 Pro (8+256)平板",3999,4499,"开封"],["VIVO","vivo Pad5c (12+256)平板",2999,3499,"开封"],["VIVO","vivo Pad5c (8+256)平板",2634,3099,"开封"],["VIVO","vivo Pad5c (8+128)平板",2294,2699,"开封"],["VIVO","vivo Pad SE(8+256)平板 柔光版",1954,2299,"开封"],["VIVO","vivo Pad SE(8+256)平板 标准版",1869,2199,"开封"],["VIVO","vivo Pad SE(8+128)平板 柔光版",1614,1899,"开封"],["VIVO","vivo Pad SE(8+128)平板 标准版",1529,1799,"开封"],["VIVO","vivo Pad5 (16+512)平板",3299,3799,"开封"],["VIVO","vivo Pad5 (12+256)平板",2804,3299,"开封"],["VIVO","vivo Pad5 (8+256)平板",2549,2999,"开封"],["VIVO","vivo Pad5e (16+512)平板",3199,3699,"开封"],["VIVO","vivo Pad5e (12+256)平板",2719,3199,"开封"],["VIVO","vivo Pad5e (8+256)平板",2464,2899,"开封"],["VIVO","vivo Watch6 eSIM版 不锈钢软胶",1189,1399,"开封"],["VIVO","vivo Watch6 蓝牙版 不锈钢软胶",849,999,"开封"],["VIVO","vivo Watch GT2 eSIM版 不锈钢金属",764,899,"开封"],["VIVO","vivo Watch GT2 eSIM版 软胶",679,799,"开封"],["VIVO","vivo Watch GT2 蓝牙版 软胶",509,599,"开封"],["VIVO","vivo Watch5 eSIM版 精钢 真皮",1019,1199,"开封"],["VIVO","vivo Watch5 eSIM版 软胶",849,999,"开封"],["VIVO","vivo Watch5 蓝牙版 精钢 真皮",849,999,"开封"],["VIVO","vivo Watch5 蓝牙版 软胶",679,799,"开封"],["VIVO","vivo TWS 5 Pro真无线Hi-Fi耳机",849,999,"开封"],["VIVO","vivo TWS 5真无线Hi-Fi耳机",424,499,"开封"],["VIVO","vivo TWS 5真无线降噪耳机",339,399,"开封"],["VIVO","vivo TWS 5e真无线降噪耳机",195,229,"开封"],["VIVO","vivo TWS Air3 Pro长续航 真无线降噪耳机",195,229,"开封"],["VIVO","vivo TWS Air3 Pro真无线降噪耳机",169,199,"开封"],["VIVO","vivo TWS Air3 真无线耳机",84,99,"开封"],["VIVO","vivo Buds Clip无线充版 耳夹耳机",679,799,"开封"],["VIVO","vivo Buds Clip标准版 耳夹耳机",594,699,"开封"],["VIVO","X Fold 6(16+1T)",10999,0,"开封"],["VIVO","X Fold 6(16+512)",9999,0,"开封"],["VIVO","X Fold 6(12+512)",8999,0,"开封"],["VIVO","X Fold 6 (12+256)",7999,0,"开封"],["VIVO","X500ProMax(16+1T)创作者套装",11999,12999,"开封"],["VIVO","X500ProMax(12+1T)卫星通信版",7999,8999,"开封"],["VIVO","X500ProMax(16+512)",7499,8499,"开封"],["VIVO","X500ProMax(12+512)",6999,7999,"开封"],["VIVO","X500ProMax(12+256)",5499,6999,"开封"],["VIVO","X500Pro (12+1T)",7499,8499,"开封"],["VIVO","X500Pro (12+512)",6499,7499,"开封"],["VIVO","X500Pro(12+256)",4999,6499,"开封"],["VIVO","X500 (12+1T)",5499,6999,"开封"],["VIVO","X500 (12+512)",4999,5999,"开封"],["VIVO","X500 (12+256)",4499,5499,"开封"],["VIVO","X300 E (12+512)",4299,5299,"开封"],["VIVO","X300 E (12+256)",3799,4799,"开封"],["VIVO","X300Ultra(16+1T)卫星通信版",8049,8999,"开封"],["VIVO","X300Ultra(16+512)",7049,7999,"开封"],["VIVO","X300Ultra(12+512)",6549,7499,"开封"],["VIVO","X300s (16+1T)",6099,6999,"开封"],["VIVO","X300s (16+512)",5199,5999,"开封"],["VIVO","X300s (12+512)",4699,5499,"开封"],["VIVO","X300s (12+256)",4199,4999,"开封"],["VIVO","S60 (16+512)",3699,4399,"开封"],["VIVO","S60 (12+512)",3299,3999,"开封"],["VIVO","S60 (12+256)",2899,3599,"开封"],["VIVO","S60元气版(12+512)",2804,3499,"开封"],["VIVO","S60元气版(12+256)",2549,3199,"开封"],["VIVO","S60元气版(8+256)",2294,2899,"开封"],["VIVO","S50Pro mini (16+512)",3499,4299,"开封"],["VIVO","S50Pro mini (12+512)",3199,3999,"开封"],["VIVO","S50 (16+512)",3199,3599,"开封"],["VIVO","S50 (12+512)",2899,3299,"开封"],["VIVO","S50 (12+256)",2634,2999,"开封"],["VIVO","Y600Pro (12+512)",2379,2899,"开封"],["VIVO","Y600Pro (12+256)",2124,2599,"开封"],["VIVO","Y600Pro (8+512)",2124,2599,"开封"],["VIVO","Y600Pro (8+256)",1869,2299,"开封"],["VIVO","Y500s (12+256)",1801,2199,"开封"],["VIVO","Y500s (8+512)",1801,2199,"开封"],["VIVO","Y500s (8+256)",1461,1799,"开封"],["VIVO","Y500s (6+128)",1274,1599,"开封"],["VIVO","Y60i (6+128)",1274,1899,"开封"],["VIVO","Y60i (4+128)",1104,1599,"开封"],["VIVO","Y60 (8+256)",1487,2299,"开封"],["VIVO","Y60 (6+256)",1402,1999,"开封"],["VIVO","Y60 (6+128)",1232,1799,"开封"],["VIVO","Y500Pro (12+512)",2209,2599,"开封"],["VIVO","Y500Pro (12+256)",1954,2299,"开封"],["VIVO","Y500 (12+512)",1699,1999,"开封"],["VIVO","Y500 (12+256)",1529,1799,"开封"],["VIVO","Y500i (12+256)",1699,1999,"开封"],["VIVO","Y500i (8+512)",1699,1999,"开封"],["VIVO","Y500i (8+256)",1529,1799,"开封"],["VIVO","Y50s (12+256)",1954,2299,"开封"],["VIVO","Y50s (8+256)",1699,1999,"开封"],["VIVO","Y50e (6+128)",1274,1499,"开封"],["VIVO","Y300Pro+ (12+512)",2124,2499,"开封"],["VIVO","Y300Pro+ (12+256)",1869,2199,"开封"],["VIVO","iQOO Neo11 12+256面对疾风",2985,3599,""],["VIVO","iQOO Neo11 12+256像素方橙",2925,3599,""],["VIVO","iQOO Neo11 12+512疾影黑",3660,4099,""],["VIVO","iQOO Neo11 12+512面对疾风",3675,4099,""],["VIVO","iQOO Neo11 16+1T驰光白",4460,5599,""],["VIVO","iQOO Neo11 16+1T像素方橙",4430,5599,""],["VIVO","iQOO Neo11 16+512驰光白",3765,4499,""],["VIVO","iQOO Neo11 16+512疾影黑",3760,4499,""],["VIVO","iQOO Neo11 16+512面对疾风",3685,4499,""],["VIVO","iQOO Neo11至尊 12+256乘风",2735,3699,""],["VIVO","iQOO Neo11至尊 12+256驰光白",2760,3699,""],["VIVO","iQOO Neo11至尊 12+512乘风",3640,4299,""],["VIVO","iQOO Neo11至尊 12+512驰光白",3645,4299,""],["VIVO","iQOO Neo11至尊 12+512疾影黑",3635,4299,""],["VIVO","iQOO Neo11至尊 16+512乘风",3825,4699,""],["VIVO","iQOO Neo11至尊 16+512驰光白",3810,4699,""],["VIVO","iQOO Neo11至尊 16+512疾影黑",3895,4699,""],["VIVO","IQOO Pad5pro 12+256WIFI灰晶",2880,3499,""],["VIVO","IQOO Pad5pro 12+256WIFI曼岛",2885,3499,""],["VIVO","IQOO Pad5pro 12+256WIFI银翼",2885,3499,""],["VIVO","IQOO Pad5pro 8+256WIFI灰晶",2810,3199,""],["VIVO","IQOO Pad5pro 8+256WIFI银翼",2885,3199,""],["VIVO","IQOO Pad6pro 12+256WIFI灰晶",3710,4999,""],["VIVO","IQOO Pad6pro 12+256WIFI曼岛",3715,4999,""],["VIVO","IQOO Pad6pro 12+256WIFI银翼",3710,4999,""],["VIVO","IQOO Pad6pro 12+512WIFI灰晶",4215,5799,""],["VIVO","IQOO Pad6pro 12+512WIFI曼岛",4235,5799,""],["VIVO","IQOO Pad6pro 12+512WIFI银翼",4330,5799,""],["VIVO","IQOO Pad6pro 8+256WIFI灰晶",3395,4499,""],["VIVO","IQOO Pad6pro 8+256WIFI银翼",3430,4499,""],["VIVO","IQOO Padultra12+256WIFI黑",5910,6499,""],["VIVO","IQOO Padultra12+256WIFI银",5860,6499,""],["VIVO","IQOO Padultra16+256WIFI黑",6900,7199,""],["VIVO","IQOO Padultra16+256WIFI银",6850,7199,""],["VIVO","iQOO Z10Turbo 12+256沙漠色",2180,2699,""],["VIVO","iQOO Z10Turbo 12+256星穹黑",2205,2699,""],["VIVO","iQOO Z10Turbo 12+256云海白",2225,2699,""],["VIVO","iQOO Z10Turbo 12+512沙漠色",2720,3199,""],["VIVO","iQOO Z10Turbo 12+512星穹黑",2740,3199,""],["VIVO","iQOO Z10Turbo 12+512云海白",2800,3199,""],["VIVO","iQOO Z10Turbo 16+512沙漠色",3090,3599,""],["VIVO","iQOO Z10Turbo 16+512星穹黑",3030,3599,""],["VIVO","iQOO Z10Turbo 16+512云海白",3125,3599,""],["VIVO","iQOO Z10Turbo+ 12+256极地灰",2680,3199,""],["VIVO","iQOO Z10Turbo+ 12+256云海白",2690,3199,""],["VIVO","iQOO Z10Turbo+ 12+512极地灰",3410,3699,""],["VIVO","iQOO Z10x 12+256星穹黑",1745,1899,""],["VIVO","iQOO Z10x 12+256月岩钛",1730,1899,""],["VIVO","iQOO Z10x 8+128凤羽青",1275,1499,""],["VIVO","iQOO Z10x 8+128星穹黑",1290,1499,""],["VIVO","iQOO Z10x 8+128月岩钛",1265,1499,""],["VIVO","iQOO Z10x 8+256凤羽青",1490,1699,""],["VIVO","iQOO Z10x 8+256星穹黑",1470,1699,""],["VIVO","iQOO Z10x 8+256月岩钛",1490,1699,""],["VIVO","iQOO Z11 12+256沧浪浮光",2250,2499,""],["VIVO","iQOO Z11 12+256极夜黑",2215,2499,""],["VIVO","iQOO Z11 12+256天光白",2235,2499,""],["VIVO","iQOO Z11 12+512沧浪浮光",2695,2999,""],["VIVO","iQOO Z11 12+512极夜黑",2695,2999,""],["VIVO","iQOO Z11 12+512天光白",2665,2999,""],["VIVO","iQOO Z11 16+256沧浪浮光",2600,2799,""],["VIVO","iQOO Z11 16+256极夜黑",2595,2799,""],["VIVO","iQOO Z11 16+256天光白",2565,2799,""],["VIVO","iQOO Z11 8+256沧浪浮光",2000,2299,""],["VIVO","iQOO Z11 8+256极夜黑",2045,2299,""],["VIVO","iQOO Z11 8+256天光白",2045,2299,""],["VIVO","iQOO Z11i 6+128黑",1095,1399,""],["VIVO","iQOO Z11i 6+128青",1095,1399,""],["VIVO","iQOO Z11i 6+128沙漠金",1115,1399,""],["VIVO","iQOO Z11i 8+128黑",1265,1599,""],["VIVO","iQOO Z11i 8+128青",1265,1599,""],["VIVO","iQOO Z11i 8+128沙漠金",1235,1599,""],["VIVO","iQOO Z11i 8+256黑",1445,1899,""],["VIVO","iQOO Z11i 8+256青",1465,1899,""],["VIVO","iQOO Z11i 8+256沙漠金",1465,1899,""],["VIVO","iQOO Z11s 12+256白",2045,2599,""],["VIVO","iQOO Z11s 12+256黑",2185,2599,""],["VIVO","iQOO Z11s 12+256万里浮光",2070,2599,""],["VIVO","iQOO Z11s 12+512白",2425,3099,""],["VIVO","iQOO Z11s 12+512黑",2435,3099,""],["VIVO","iQOO Z11s 12+512万里浮光",2470,3099,""],["VIVO","iQOO Z11Turbo 12+256仓浪浮光",2465,3299,""],["VIVO","iQOO Z11Turbo 12+256光晕粉",2485,3299,""],["VIVO","iQOO Z11Turbo 12+256极夜黑",2460,3299,""],["VIVO","iQOO Z11Turbo 12+256天光白",2465,3299,""],["VIVO","iQOO Z11Turbo 12+512仓浪浮光",3260,3999,""],["VIVO","iQOO Z11Turbo 12+512光晕粉",3240,3999,""],["VIVO","iQOO Z11Turbo 12+512极夜黑",3220,3999,""],["VIVO","iQOO Z11Turbo 12+512天光白",3215,3999,""],["VIVO","iQOO Z11Turbo 16+1TB天光白",4390,4999,""],["VIVO","iQOO Z11Turbo 16+256仓浪浮光",3070,3799,""],["VIVO","iQOO Z11Turbo 16+256光晕粉",3040,3799,""],["VIVO","iQOO Z11Turbo 16+256极夜黑",3030,3799,""],["VIVO","iQOO Z11Turbo 16+256天光白",3065,3799,""],["VIVO","iQOO Z11Turbo 16+512仓浪浮光",3740,4399,""],["VIVO","iQOO Z11Turbo 16+512光晕粉",3790,4399,""],["VIVO","iQOO Z11Turbo 16+512极夜黑",3760,4399,""],["VIVO","iQOO Z11Turbo 16+512天光白",3755,4399,""],["VIVO","iQOO Z11x 12+256冰青绿",1825,2499,""],["VIVO","iQOO Z11x 12+256雪屿白",1845,2499,""],["VIVO","iQOO Z11x 12+256夜影黑",1855,2499,""],["VIVO","iQOO Z11x 8+128冰青绿",1300,1899,""],["VIVO","iQOO Z11x 8+128雪屿白",1305,1899,""],["VIVO","iQOO Z11x 8+128夜影黑",1295,1899,""],["VIVO","iQOO Z11x 8+256冰青绿",1585,2099,""],["VIVO","iQOO Z11x 8+256雪屿白",1595,2099,""],["VIVO","iQOO Z11x 8+256夜影黑",1585,2099,""],["VIVO","iQOO Z11x 8+512冰青绿",2070,2599,""],["VIVO","iQOO Z11x 8+512雪屿白",2085,2599,""],["VIVO","iQOO Z11x 8+512夜影黑",2065,2599,""],["VIVO","iQOO Z9 8+256山野青",1620,0,""],["VIVO","iQOO Z9 8+256星芒白",1670,0,""],["VIVO","iQOO15 12+256传奇",4170,5299,""],["VIVO","iQOO15 12+256凌云",4070,5299,""],["VIVO","iQOO15 12+256赛道",4170,5299,""],["VIVO","iQOO15 12+512传奇",4640,5999,""],["VIVO","iQOO15 12+512凌云",4540,5999,""],["VIVO","iQOO15 16+512传奇",4925,6499,""],["VIVO","iQOO15 16+512凌云",4890,6499,""],["VIVO","iQOO15 16+512赛道",5075,6499,""],["VIVO","iQOO15T 12+256传奇",3340,4099,""],["VIVO","iQOO15T 12+256青云",3390,4099,""],["VIVO","iQOO15T 12+256赛道",3410,4099,""],["VIVO","iQOO15T 12+512传奇",3910,4799,""],["VIVO","iQOO15T 12+512青云",3970,4799,""],["VIVO","iQOO15T 12+512赛道",4010,4799,""],["VIVO","iQOO15T 16+256传奇",3860,4499,""],["VIVO","iQOO15T 16+512传奇",3970,5199,""],["VIVO","iQOO15T 16+512青云",4000,5199,""],["VIVO","iQOO15T 16+512赛道",4015,5199,""],["VIVO","iQOO15Ultra 16+1T银色",6510,6999,""],["VIVO","iQOO15Ultra 16+256黑色",5340,5499,""],["VIVO","iQOO15Ultra 16+512黑色",5410,5999,""],["VIVO","iQOO15Ultra 16+512银色",5310,5999,""],["VIVO","iQOO16 12+256豫传奇",5160,5999,""],["VIVO","iQOO16 12+256豫赛道",5240,5999,""],["VIVO","iQOO16 12+256豫逐光",5290,5999,""],["VIVO","iQOO16 12+512豫传奇",5670,6799,""],["VIVO","iQOO16 12+512豫赛道",5690,6799,""],["VIVO","iQOO16 12+512豫逐光",5840,6799,""],["VIVO","iQOO16 16+1tb豫传奇",7490,8499,""],["VIVO","iQOO16 16+1tb豫赛道",7390,8499,""],["VIVO","iQOO16 16+1tb豫逐光",7360,8499,""],["VIVO","iQOO16 16+512豫传奇",6260,7499,""],["VIVO","iQOO16 16+512豫赛道",6340,7499,""],["VIVO","iQOO16 16+512豫逐光",6440,7499,""],["VIVO","VIVO Pad5pro 12+256WIFI春潮蓝",2860,3399,""],["VIVO","VIVO Pad5pro 12+256WIFI寒星灰",2910,3399,""],["VIVO","VIVO Pad5pro 12+256WIFI云霞粉",2910,3399,""],["VIVO","VIVO Pad5pro 8+128WIFI春潮蓝",2585,2999,""],["VIVO","VIVO Pad5pro 8+256WIFI春潮蓝",2760,3099,""],["VIVO","VIVO Pad5pro 8+256WIFI寒星灰",2760,3099,""],["VIVO","vivo Pad6pro 12+256WIFI松弛蓝",3625,4999,""],["VIVO","vivo Pad6pro 12+256WIFI自在灰",3640,4999,""],["VIVO","vivo Pad6pro 12+512WIFI松弛蓝",4210,5799,""],["VIVO","vivo Pad6pro 12+512WIFI自在灰",4225,5799,""],["VIVO","vivo Pad6pro 16+512WIFI松弛蓝",4635,6699,""],["VIVO","vivo Pad6pro 16+512WIFI自在灰",4785,6699,""],["VIVO","vivo Pad6pro 8+256WIFI自在灰",3330,4499,""],["VIVO","VIVO S30 12+256可可黑",2045,2699,""],["VIVO","VIVO S30 12+256桃桃粉",1995,2699,""],["VIVO","VIVO S30pro mini 12+512酷莓粉",2830,3799,""],["VIVO","VIVO S30pro mini 16+512可可黑",2935,3999,""],["VIVO","VIVO S30pro mini 16+512柠檬黄",3060,3999,""],["VIVO","VIVO S50 12+256灵感紫",2610,2999,""],["VIVO","VIVO S50 12+512告白",2895,3299,""],["VIVO","VIVO S50 12+512灵感紫",2865,3299,""],["VIVO","VIVO S50 12+512深空黑",2865,3299,""],["VIVO","VIVO S50 12+512悠悠蓝",2890,3299,""],["VIVO","VIVO S50 16+512告白",3180,3599,""],["VIVO","VIVO S50 16+512灵感紫",3120,3599,""],["VIVO","VIVO S50 16+512深空黑",3090,3599,""],["VIVO","VIVO S50 16+512悠悠蓝",3130,3599,""],["VIVO","VIVO S50pro mini 12+512深空黑",3225,3999,""],["VIVO","VIVO S50pro mini 16+512告白",3685,4299,""],["VIVO","VIVO S50pro mini 16+512深空黑",3510,4299,""],["VIVO","VIVO S60 12+256初夏绿",2920,3599,""],["VIVO","VIVO S60 12+256星星海",2860,3599,""],["VIVO","VIVO S60 12+256仲夏夜",2835,3599,""],["VIVO","VIVO S60 12+256元气版初夏绿",2555,3599,""],["VIVO","VIVO S60 12+256元气版星星海",2535,3599,""],["VIVO","VIVO S60 12+256元气版仲夏夜",2510,3599,""],["VIVO","VIVO S60 12+512初夏绿",3125,3999,""],["VIVO","VIVO S60 12+512星星海",3165,3999,""],["VIVO","VIVO S60 12+512仲夏夜",3160,3999,""],["VIVO","VIVO S60 12+512元气版初夏绿",2795,3999,""],["VIVO","VIVO S60 12+512元气版星星海",2760,3999,""],["VIVO","VIVO S60 12+512元气版仲夏夜",2810,3999,""],["VIVO","VIVO S60 16+512初夏绿",3540,4399,""],["VIVO","VIVO S60 16+512星星海",3485,4399,""],["VIVO","VIVO S60 16+512仲夏夜",3540,4399,""],["VIVO","VIVO S60 8+256元气版初夏绿",2270,2899,""],["VIVO","VIVO S60 8+256元气版星星海",2305,2899,""],["VIVO","VIVO S60 8+256元气版仲夏夜",2305,2899,""],["VIVO","VIVO X FOLD6 12+256极夜",6950,7999,""],["VIVO","VIVO X FOLD6 12+256蓝洞",6800,7999,""],["VIVO","VIVO X FOLD6 12+256盐湖",6700,7999,""],["VIVO","VIVO X FOLD6 12+512极夜",7550,8999,""],["VIVO","VIVO X FOLD6 12+512蓝洞",7600,8999,""],["VIVO","VIVO X FOLD6 12+512盐湖",7500,8999,""],["VIVO","VIVO X FOLD6 16+1T黑金版",9650,10999,""],["VIVO","VIVO X FOLD6 16+1T极夜",9600,10999,""],["VIVO","VIVO X FOLD6 16+1T蓝洞",9650,10999,""],["VIVO","VIVO X FOLD6 16+512极夜",8700,9999,""],["VIVO","VIVO X FOLD6 16+512蓝洞",8550,9999,""],["VIVO","VIVO X FOLD6 16+512盐湖",8600,9999,""],["VIVO","VIVO X300 12+256纯粹黑",3640,4599,""],["VIVO","VIVO X300 12+256惬意紫",3585,4599,""],["VIVO","VIVO X300 12+256幸运彩",3585,4599,""],["VIVO","VIVO X300 12+512豫纯粹黑",4315,5299,""],["VIVO","VIVO X300 12+512豫惬意紫",4275,5299,""],["VIVO","VIVO X300 12+512豫自在蓝",4300,5299,""],["VIVO","VIVO X300 12+512好运红",4130,5299,""],["VIVO","VIVO X300 16+256豫纯粹黑",4040,4999,""],["VIVO","VIVO X300 16+256豫惬意紫",4030,4999,""],["VIVO","VIVO X300 16+256豫幸运彩",4070,4999,""],["VIVO","VIVO X300 16+256豫自在蓝",4170,4999,""],["VIVO","VIVO X300 16+512豫纯粹黑",4260,5699,""],["VIVO","VIVO X300 16+512豫惬意紫",4355,5699,""],["VIVO","VIVO X300 16+512豫幸运彩",4360,5699,""],["VIVO","VIVO X300 16+512豫自在蓝",4620,5699,""],["VIVO","VIVO X300E 12+256豫白",3790,4799,""],["VIVO","VIVO X300E 12+256豫橙",3560,4799,""],["VIVO","VIVO X300E 12+256豫黑",3560,4799,""],["VIVO","VIVO X300E 12+512白",4090,5299,""],["VIVO","VIVO X300E 12+512橙",3870,5299,""],["VIVO","VIVO X300E 12+512黑",3870,5299,""],["VIVO","VIVO X300pro 12+256卫星通信版自在蓝",4580,5599,""],["VIVO","VIVO X300pro 12+512卫星通信版纯粹黑",4805,5999,""],["VIVO","VIVO X300pro 12+512卫星通信版简单白",4805,5999,""],["VIVO","VIVO X300pro 12+512卫星通信版旷野棕",4790,5999,""],["VIVO","VIVO X300pro 12+512卫星通信版自在蓝",4990,5999,""],["VIVO","VIVO X300pro 16+1TB豫纯粹黑",6155,7199,""],["VIVO","VIVO X300pro 16+1TB豫简单白",6140,7199,""],["VIVO","VIVO X300pro 16+1TB豫旷野棕",6150,7199,""],["VIVO","VIVO X300pro 16+1TB豫自在蓝",6155,7199,""],["VIVO","VIVO X300pro 16+512豫纯粹黑",5290,6399,""],["VIVO","VIVO X300pro 16+512卫星通信版纯粹黑",5185,6399,""],["VIVO","VIVO X300pro 16+512卫星通信版简单白",4910,6399,""],["VIVO","VIVO X300pro 16+512卫星通信版旷野棕",5000,6399,""],["VIVO","VIVO X300pro 16+512卫星通信版自在蓝",4910,6399,""],["VIVO","VIVO X300s 12+256胶片绿",4115,4999,""],["VIVO","VIVO X300s 12+256梦核紫",4115,4999,""],["VIVO","VIVO X300s 12+256钛黑",4070,4999,""],["VIVO","VIVO X300s 12+256银白",4175,4999,""],["VIVO","VIVO X300s 12+512豫胶片绿",4885,5499,""],["VIVO","VIVO X300s 12+512豫梦核紫",4775,5499,""],["VIVO","VIVO X300s 12+512豫钛黑",4775,5499,""],["VIVO","VIVO X300s 16+1TB豫银白",6060,6999,""],["VIVO","VIVO X300s 16+512豫胶片绿",5070,5999,""],["VIVO","VIVO X300s 16+512豫梦核紫",5160,5999,""],["VIVO","VIVO X300s 16+512豫钛黑",5060,5999,""],["VIVO","VIVO X300s 16+512豫银白",5260,5999,""],["VIVO","VIVO X300Ultra 12+256黑k",6060,7499,""],["VIVO","VIVO X300Ultra 12+256胶片绿",5910,7499,""],["VIVO","VIVO X300Ultra 12+256银调",5955,7499,""],["VIVO","VIVO X300Ultra 12+512黑k",6350,7999,""],["VIVO","VIVO X300Ultra 12+512胶片绿",6450,7999,""],["VIVO","VIVO X300Ultra 12+512银调",6300,7999,""],["VIVO","VIVO X300Ultra 16+512胶片绿",7155,8999,""],["VIVO","VIVO X300Ultra 16+512银调",7150,8999,""],["VIVO","VIVO X500 12+256豫大地回声",4610,5499,""],["VIVO","VIVO X500 12+256豫聂夜",4660,5499,""],["VIVO","VIVO X500 12+256豫晴天",4720,5499,""],["VIVO","VIVO X500 12+512豫晨曦",5110,5999,""],["VIVO","VIVO X500 12+512豫聂夜",5055,5999,""],["VIVO","VIVO X500 12+512豫晴天",5090,5999,""],["VIVO","VIVO X500 12+512大地回声",5040,5999,""],["VIVO","VIVO X500pro 12+256豫晴天",5410,6499,""],["VIVO","VIVO X500pro 12+512豫大地回声",5960,7499,""],["VIVO","VIVO X500pro 12+512豫览霞",6210,7499,""],["VIVO","VIVO X500pro 12+512豫聂夜",6060,7499,""],["VIVO","VIVO X500pro 12+512豫晴天",6060,7499,""],["VIVO","VIVO Y500 12+512冰川蓝",2240,0,""],["VIVO","VIVO Y500 12+512龙晶紫",2195,0,""],["VIVO","VIVO Y500 12+512玄武黑",2260,0,""],["VIVO","VIVO Y500i 12+256凤迎金",1650,1999,""],["VIVO","VIVO Y500i 12+256星河银",1650,1999,""],["VIVO","VIVO Y500i 12+256曜石黑",1655,1999,""],["VIVO","VIVO Y500i 8+256豫凤迎金",1550,1799,""],["VIVO","VIVO Y500i 8+256豫星河银",1545,1799,""],["VIVO","VIVO Y500i 8+256豫曜石黑",1545,1799,""],["VIVO","VIVO Y500i 8+512豫凤迎金",1840,1999,""],["VIVO","VIVO Y500i 8+512豫星河银",1915,1999,""],["VIVO","VIVO Y500i 8+512豫幸运红",1820,1999,""],["VIVO","VIVO Y500i 8+512豫曜石黑",1835,1999,""],["VIVO","VIVO Y500pro 12+256豫浅绿",1950,2299,""],["VIVO","VIVO Y500pro 12+256豫祥云金",2020,2299,""],["VIVO","VIVO Y500pro 12+512豫钛黑",2355,2599,""],["VIVO","VIVO Y500S 12+256豫凤迎金",1760,2099,""],["VIVO","VIVO Y500S 12+256豫星河银",1750,2099,""],["VIVO","VIVO Y500S 12+256豫曜石黑",1750,2099,""],["VIVO","VIVO Y500S 6+128豫凤迎金",1195,1599,""],["VIVO","VIVO Y500S 6+128豫星河银",1185,1599,""],["VIVO","VIVO Y500S 6+128豫曜石黑",1195,1599,""],["VIVO","VIVO Y500S 8+256豫凤迎金",1545,1799,""],["VIVO","VIVO Y500S 8+256豫星河银",1560,1799,""],["VIVO","VIVO Y500S 8+256豫曜石黑",1550,1799,""],["VIVO","VIVO Y500S 8+512豫曜石黑",1755,2099,""],["VIVO","VIVO Y60 6+128鸿运紫",1110,1799,""],["VIVO","VIVO Y60 6+128山海青",1120,1799,""],["VIVO","VIVO Y60 6+128曜石黑",1110,1799,""],["VIVO","VIVO Y60 6+256鸿运紫",1360,1999,""],["VIVO","VIVO Y60 6+256山海青",1340,1999,""],["VIVO","VIVO Y60 6+256曜石黑",1340,1999,""],["VIVO","VIVO Y60 8+256山海青",1490,2299,""],["VIVO","VIVO Y600i 6+256晴空蓝",1600,1999,""],["VIVO","VIVO Y600pro 12+256豫浮光金",2110,2599,""],["VIVO","VIVO Y600pro 12+256豫浩渺蓝",2095,2599,""],["VIVO","VIVO Y600pro 12+256豫皓月黑",2095,2599,""],["VIVO","VIVO Y600pro 12+256豫星耀紫",2125,2599,""],["VIVO","VIVO Y600pro 12+512豫浮光金",2395,2899,""],["VIVO","VIVO Y600pro 12+512豫浩渺蓝",2360,2899,""],["VIVO","VIVO Y600pro 12+512豫皓月黑",2355,2899,""],["VIVO","VIVO Y600pro 12+512豫星耀紫",2400,2899,""],["VIVO","VIVO Y600pro 8+256豫浮光金",1855,2299,""],["VIVO","VIVO Y600pro 8+256豫浩渺蓝",1865,2299,""],["VIVO","VIVO Y600pro 8+256豫皓月黑",1865,2299,""],["VIVO","VIVO Y600pro 8+256豫星耀紫",1865,2299,""],["VIVO","VIVO Y600pro 8+512浩渺蓝",2200,2599,""],["VIVO","VIVO Y60i 6+128鸿运紫",1120,1899,""],["VIVO","VIVO Y60i 6+128山海青",1120,1899,""],["VIVO","VIVO Y60i 6+128曜石黑",1120,1899,""],["VIVO","VIVO Y6tm 6+256流云白",1260,0,""],["VIVO","VIVO Y6tm 6+256暮夜黑",1250,0,""],["华为荣耀平板手表系列","24款MatePad air12寸-12+256wifi草木绿",2670,0,""],["华为荣耀平板手表系列","24款MatePad air12寸-12+256wifi羽砂白",2700,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-12+256wifi草木绿",2900,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-12+256wifi烟云灰",2900,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-12+256wifi樱羽粉",2900,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-12+256wifi羽砂白",2900,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-12+512wifi烟云灰",3530,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-8+256wifi烟云灰",2400,0,""],["华为荣耀平板手表系列","25款MatePad air12寸-8+256wifi羽砂白",2450,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+256WiFi宣白",3750,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi飞天青",3950,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi柔光板飞天青",4500,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi柔光板宣白",4530,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi柔光板砚黑",4530,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi宣白",4000,0,""],["华为荣耀平板手表系列","25款MatePad Pro 12.2寸 12+512WiFi砚黑",3900,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+256WiFi柔光版流金",4350,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+256WiFi柔光版宣白",4350,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+256WiFi柔光版砚黑",4400,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+256WiFi宣白",4280,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+256WiFi砚黑",4400,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+512WiFi柔光版流金",4850,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+512WiFi柔光版宣白",4850,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+512WiFi柔光版砚黑",4850,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 12+512WiFi砚黑",4800,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 16+1TB(SIM卡)柔光典藏版砚黑",9100,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 16+1TBWiFi柔光版流金",6350,0,""],["华为荣耀平板手表系列","25款MatePad Pro 13.2寸 16+1TBWiFi柔光版砚黑",6400,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-12+256WiFi柔光焕新版豫海岛蓝",2900,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-12+256WiFi柔光焕新版豫深空灰",2850,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+128WiFi海岛蓝",1780,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+128WiFi深空灰",1800,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi冰霜银",2150,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi海岛蓝",2150,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版冰霜银",2245,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版海岛蓝",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版豫冰霜银",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版豫海岛蓝",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版豫深空灰",2150,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版豫羽砂紫",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版全网通深空灰",3150,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版深空灰",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi焕新版羽砂紫",2200,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光版冰霜银",2400,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光版海岛蓝",2350,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光版深空灰",2380,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光版羽砂紫",2400,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版冰霜银",2400,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版海岛蓝",2450,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版豫冰霜银",2450,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版豫海岛蓝",2450,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版豫深空灰",2450,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版豫羽砂紫",2450,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版深空灰",2430,0,""],["华为荣耀平板手表系列","26款MatePad 11.5寸-8+256WiFi柔光焕新版羽砂紫",2470,0,""],["华为荣耀平板手表系列","26款MatePad air12寸(第三代)-12+256wifi浅夏柠",3950,0,""],["华为荣耀平板手表系列","26款MatePad air12寸(第三代)-12+256wifi柔光版晴光蓝",4650,0,""],["华为荣耀平板手表系列","26款MatePad air12寸(第三代)-12+256wifi悦享版晴光蓝",3900,0,""],["华为荣耀平板手表系列","26款MatePad air12寸(第三代)-8+256wifi悦享版暖云白",2750,0,""],["华为荣耀平板手表系列","26款MatePad pro12寸-12+256Wifi皓月银",4700,0,""],["华为荣耀平板手表系列","26款MatePad pro12寸-12+256Wifi柔光屏浮光白",6150,0,""],["华为荣耀平板手表系列","26款MatePad pro12寸-12+256Wifi深空灰",4800,0,""],["华为荣耀平板手表系列","26款MatePad pro12寸-12+256Wifi悦享版皓月银",4350,0,""],["华为荣耀平板手表系列","26款MatePad pro12寸-12+256Wifi悦享版深空灰",4350,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸 12+256WiFi皓月银",5500,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸 12+256WiFi柔光版凝光工艺曜石灰",6750,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸 12+512WiFi柔光版凝光工艺曜石灰",7600,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸 12+512WiFi深空灰",6450,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸 20+1TBWiFi柔光版凝光工艺含键盘凝光蓝",11900,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸悦享版 12+256WiFi皓月银",5050,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸悦享版 12+256WiFi深空灰",5050,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸悦享版 12+512WiFi皓月银",6150,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸悦享版 12+512WiFi深空灰",6100,0,""],["华为荣耀平板手表系列","26款MatePad ProMax 13.2寸悦享版(含键盘) 16+512WiFi深空灰",8000,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT3 氟橡胶表带幻夜黑",468,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT4 氟橡胶表带风信紫",600,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT4 氟橡胶表带韵律黑",565,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT4pro 编织表带原野绿",770,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT4pro 氟橡胶表带海岛蓝",790,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT4pro 氟橡胶表带曜石黑",830,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶风信紫",730,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶豫风信紫",720,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶豫向新绿",720,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶豫韵律黑",720,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶向新绿",730,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶悦动白",745,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 氟橡胶韵律黑",735,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5 尼龙豫光织银",725,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5Pro 氟橡胶冰川白",1430,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5Pro 氟橡胶雅丹黑",1430,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5Pro 尼龙丹霞橙",1530,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5Pro豫氟橡胶雅丹黑",1420,0,""],["华为荣耀平板手表系列","HUAWEI WATCH FIT5Pro豫尼龙丹霞橙",1480,0,""],["华为荣耀平板手表系列","MatePad SE 11寸-8+256WIFI焕新版豫星海蓝",1570,0,""],["华为荣耀平板手表系列","MatePad SE 11寸-8+256WIFI焕新版豫星云灰",1570,0,""],["华为荣耀平板手表系列","MatePad SE 11寸-8+256WIFI焕新版星海蓝",1650,0,""],["华为荣耀平板手表系列","MatePad SE 11寸-8+256WIFI焕新版星云灰",1650,0,""],["华为荣耀平板手表系列","WATCH Buds 2豫黑色",2510,0,""],["华为荣耀平板手表系列","WATCH Buds 2豫棕色",2700,0,""],["华为荣耀平板手表系列","WATCH D2幻夜黑",2420,0,""],["华为荣耀平板手表系列","WATCH D2药房专供幻夜黑",1750,0,""],["华为荣耀平板手表系列","WATCH GT5(41mm)氟橡胶表带马鞍棕",760,0,""],["华为荣耀平板手表系列","WATCH GT5(41mm)氟橡胶表带魅影黑",990,0,""],["华为荣耀平板手表系列","WATCH GT5(41mm)复合素皮表带珍珠白",880,0,""],["华为荣耀平板手表系列","WATCH GT5(46mm)氟橡胶表带苍山灰",930,0,""],["华为荣耀平板手表系列","WATCH GT5(46mm)氟橡胶表带幻夜黑",1070,0,""],["华为荣耀平板手表系列","WATCH GT5(46mm)复合编织表带托帕蓝",760,0,""],["华为荣耀平板手表系列","WATCH GT5pro(42mm)氟橡胶表带冰川白",850,0,""],["华为荣耀平板手表系列","WATCH GT5pro(42mm)陶瓷表带陶瓷白",1500,0,""],["华为荣耀平板手表系列","WATCH GT5pro(46mm)氟橡胶表带曜石黑",1200,0,""],["华为荣耀平板手表系列","WATCH GT5pro(46mm)钛金属表带钛空银",1550,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)氟橡胶表带薄荷青",865,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)氟橡胶表带豫薄荷青",850,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)氟橡胶表带豫流光紫",865,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)氟橡胶表带流光紫",880,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)氟橡胶表带魅影黑",1000,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)复合素皮表带冰雪蓝",900,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)复合素皮表带浮光白",970,0,""],["华为荣耀平板手表系列","WATCH GT6(41mm)复合素皮表带马鞍棕",890,0,""],["华为荣耀平板手表系列","WATCH GT6(46mm)氟橡胶表带豫雅丹黑",1140,0,""],["华为荣耀平板手表系列","WATCH GT6(46mm)氟橡胶表带雅丹黑",1160,0,""],["华为荣耀平板手表系列","WATCH GT6(46mm)复合素皮表带冰川灰",1200,0,""],["华为荣耀平板手表系列","WATCH GT6(46mm)复合素皮表带豫原野绿",950,0,""],["华为荣耀平板手表系列","WATCH GT6(46mm)复合素皮表带原野绿",1000,0,""],["华为荣耀平板手表系列","WATCH GT6pro(46mm)氟橡胶表带曜石黑",1525,0,""],["华为荣耀平板手表系列","WATCH GT6pro(46mm)复合编制表带琥珀棕",1560,0,""],["华为荣耀平板手表系列","WATCH GT6pro(46mm)钛金属表带钛空银",1910,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)氟橡胶表带豫晴光蓝",1135,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)氟橡胶表带晴光蓝",1180,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)复合素皮表带豫月影灰",1385,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)复合素皮表带豫悦动白",1600,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)复合素皮表带月影灰",1450,0,""],["华为荣耀平板手表系列","WATCH GT7(41mm)复合素皮表带悦动白",1630,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带驰光蓝",1400,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带豫驰光蓝",1320,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带豫疾影黑",1280,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带豫速影黄",1230,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带疾影黑",1300,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)氟橡胶表带速影黄",1300,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)复合素皮表带豫星云灰",1630,0,""],["华为荣耀平板手表系列","WATCH GT7(46mm)复合素皮表带星云灰",1700,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带豫境野黄",2060,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带豫松霜绿",2150,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带豫碳晶黑",2100,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带境野黄",2050,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带松霜绿",2100,0,""],["华为荣耀平板手表系列","WATCH GT7Pro(46mm)氟橡胶表带碳晶黑",2200,0,""],["华为荣耀平板手表系列","WATCH UITIMATE DESLGN非凡大师银色钛合金金属表带星钻绽放",23650,0,""],["华为荣耀平板手表系列","WATCH Ultimate2苍穹黑豫黑色氟橡胶表带",4880,0,""],["华为荣耀平板手表系列","WATCH Ultimate2旷野绿豫绿白双色素皮复合表带",5800,0,""],["华为荣耀平板手表系列","WATCH Ultimate2蔚海蓝豫蓝白双色氟橡胶表带",5500,0,""],["华为荣耀平板手表系列","WATCH Ultimate2蔚海蓝蓝白双色氟橡胶表带",5600,0,""],["华为荣耀平板手表系列","WATCH Ultimate绿野传奇钛金属表带",3200,0,""],["华为荣耀平板手表系列","WATCH Ultimate纵横海洋钛金属表带",3600,0,""],["华为荣耀平板手表系列","WATCH4(46mm)白色真皮表带",1500,0,""],["华为荣耀平板手表系列","WATCH4(46mm)黑色氟胶表带",1180,0,""],["华为荣耀平板手表系列","WATCH4pro(48mm)火星钛-钛金属表带",2100,0,""],["华为荣耀平板手表系列","WATCH4pro(48mm)木星棕-深棕色真皮表带",1650,0,""],["华为荣耀平板手表系列","WATCH4pro(48mm)太空探索-深灰色钛金属表带",1960,0,""],["华为荣耀平板手表系列","WATCH4pro(48mm)蔚蓝地球-蓝色复合表带",1560,0,""],["华为荣耀平板手表系列","WATCH5(42mm)晨曦金钛金属表带",1650,0,""],["华为荣耀平板手表系列","WATCH5(42mm)幻月黑氟橡胶表带",1485,0,""],["华为荣耀平板手表系列","WATCH5(42mm)极光绿氟橡胶表带",1410,0,""],["华为荣耀平板手表系列","WATCH5(42mm)金星白素皮复合表带",1410,0,""],["华为荣耀平板手表系列","WATCH5(42mm)十周年蓝色素皮表带",2100,0,""],["华为荣耀平板手表系列","WATCH5(42mm)星云杏素皮复合表带",1550,0,""],["华为荣耀平板手表系列","WATCH5(46mm)苍穹黑氟橡胶表带",1510,0,""],["华为荣耀平板手表系列","WATCH5(46mm)木星棕素皮复合表带",1720,0,""],["华为荣耀平板手表系列","WATCH5(46mm)十周年蓝色素皮表带",1620,0,""],["华为荣耀平板手表系列","WATCH5(46mm)钛空银钛金属表带",1970,0,""],["华为荣耀平板手表系列","WATCH5(46mm)星河蓝",1570,0,""],["华为荣耀平板手表系列","WATCH5(46mm)银河紫素皮复合表带",1520,0,""],["华为荣耀平板手表系列","WATCH6 Pro (43mm)复合素皮表带豫星芒白",3050,0,""],["华为荣耀平板手表系列","WATCH6 Pro (43mm)陶瓷表带豫陶瓷白",4150,0,""],["华为荣耀平板手表系列","WATCH6 Pro (46mm)素皮复合表带豫木星棕",2980,0,""],["华为荣耀平板手表系列","WATCH6 Pro (46mm)钛金属表带太空探索",4520,0,""],["华为荣耀平板手表系列","WATCH6(42mm)氟橡胶表带晨曦金",2255,0,""],["华为荣耀平板手表系列","WATCH6(42mm)氟橡胶表带豫幻夜黑",2310,0,""],["华为荣耀平板手表系列","WATCH6(42mm)素皮复合表带豫凝霜白",2405,0,""],["华为荣耀平板手表系列","WATCH6(46mm)氟橡胶表带豫苍穹黑",2305,0,""],["华为荣耀平板手表系列","WATCH6(46mm)氟橡胶表带豫天青蓝",2325,0,""],["华为荣耀平板手表系列","WATCH6(46mm)氟橡胶表带天青蓝",2385,0,""],["华为荣耀平板手表系列","华为Matepad mini 8.8英寸12+256 SIM版雪域白",3450,0,""],["华为荣耀平板手表系列","华为Matepad mini 8.8英寸12+256 SIM版曜石黑",3450,0,""],["华为荣耀平板手表系列","华为超新星手表X1pro豫幻夜黑",1790,0,""],["华为荣耀平板手表系列","华为超新星手表X1pro豫梦幻紫",1790,0,""],["华为荣耀平板手表系列","华为超新星手表X1豫星际蓝",1230,0,""],["华为荣耀平板手表系列","华为超新星手表X1豫星云粉",1230,0,""],["华为荣耀平板手表系列","华为儿童手表4Pro粉色",495,0,""],["华为荣耀平板手表系列","华为儿童手表4Pro蓝色",485,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro冰晶粉",785,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro冰晶蓝",790,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro豫冰晶粉",775,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro豫冰晶蓝",780,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro豫原野绿",760,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro豫仲夏紫",780,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro原野绿",775,0,""],["华为荣耀平板手表系列","华为儿童手表5Pro仲夏紫",790,0,""],["华为荣耀平板手表系列","华为儿童手表5XPRO幻夜黑",1150,0,""],["华为荣耀平板手表系列","华为儿童手表5XPRO极光紫",1200,0,""],["华为荣耀平板手表系列","华为儿童手表5X星际蓝",730,0,""],["华为荣耀平板手表系列","华为儿童手表5海岛蓝",395,0,""],["华为荣耀平板手表系列","华为儿童手表5新耀款粉色",425,0,""],["华为荣耀平板手表系列","华为儿童手表5新耀款蓝色",405,0,""],["华为荣耀平板手表系列","华为儿童手表5原野绿",385,0,""],["华为荣耀平板手表系列","华为儿童手表5仲夏紫",370,0,""],["苹果","24款苹果国行鼠标C口-白(K53)原封",435,0,""],["苹果","25款iPad Pro11寸Wifi 256GB标准黑色WK4",9070,0,""],["苹果","25款iPad Pro11寸Wifi 256GB标准银色WL4",9070,0,""],["苹果","25款iPad11 WiFi128粉色4E4",3290,0,""],["苹果","25款iPad11 WiFi128蓝色4A4",3300,0,""],["苹果","25款iPad11 WiFi128银色3Y4",3275,0,""],["苹果","25款iPad11 WiFi256粉色4P4",3815,0,""],["苹果","25款iPad11 WiFi256蓝色4H4",3815,0,""],["苹果","25款iPad11 WiFi256银色4G4",3810,0,""],["苹果","26款11英寸iPad Air8-128GB蓝色314",4960,0,""],["苹果","26款11英寸iPad Air8-128GB深空灰色304",4940,0,""],["苹果","26款11英寸iPad Air8-128GB星光色334",4940,0,""],["苹果","26款11英寸iPad Air8-128GB紫色344",4910,0,""],["苹果","26款11英寸iPad Air8-256GB蓝色364",5460,0,""],["苹果","26款11英寸iPad Air8-256GB深空灰色354",5460,0,""],["苹果","26款11英寸iPad Air8-256GB星光色374",5480,0,""],["苹果","26款11英寸iPad Air8-256GB紫色394",5480,0,""],["苹果","26款11英寸iPad Air8-512GB深空灰色3A4",6970,6999,""],["苹果","26款11英寸iPad Air8-512GB星光色3D4",6970,6999,""],["苹果","26款11英寸iPad Air8-512GB紫色3E4",7000,0,""],["苹果","26款13英寸iPad Air8-256GB蓝色5V4",7090,0,""],["苹果","26款13英寸iPad Air8-256GB深空灰色5U4",7100,0,""],["苹果","26款13英寸iPad Air8-256GB星光色5W4",7110,0,""],["苹果","26款13英寸iPad Air8-256GB紫色5X4",7080,0,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )16+1T天蓝色(HJ4)",9290,9999,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )16+1T午夜色(HF4)",9340,9999,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )16+1T星光色(HC4)",9260,9999,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )16+1T银色(H84)",9330,9999,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )24+1T天蓝色(HK4)",11460,11499,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )24+1T午夜色(HG4)",11370,11499,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )24+1T星光色(HD4)",11360,11499,""],["苹果","26款13英寸MacBook AIr(M5 10+10 )24+1T银色(H94)",11180,11499,""],["苹果","26款13英寸MacBook AIr(M5 10+8 )16+512天蓝色(HH4)",7460,8499,""],["苹果","26款13英寸MacBook AIr(M5 10+8 )16+512午夜色(HE4)",7460,8499,""],["苹果","26款13英寸MacBook AIr(M5 10+8 )16+512星光色(HA4)",7460,8499,""],["苹果","26款13英寸MacBook AIr(M5 10+8 )16+512银色(H74)",7460,8499,""],["苹果","26款13英寸NEO A18pro6+5核 8+256靛蓝色 (FF4)",4160,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+256柑橘黄色 (FD4)",4210,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+256桃粉色 (FH4)",4110,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+256银色 (FA4)",4160,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+512G柑橘黄色 带触控ID (FE4)",4940,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+512G桃粉色 带触控ID (FJ4)",4740,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+512G银色 带触控ID (FC4)",4760,0,""],["苹果","26款13英寸NEO A18pro6+5核 8+512靛蓝色 带触控ID (FG4)",4820,0,""],["苹果","AirPods Pro 3(第三代) HP4",1235,1899,""],["苹果","MX2D3CH/A 2024款苹果手写笔 Pencil Pro",765,999,""],["苹果","苹果17-256GB白色6X4/784",5710,5999,""],["苹果","苹果17-256GB白色6X4/784仅激活",4960,5999,""],["苹果","苹果17-256GB黑色6W4/774",5710,5999,""],["苹果","苹果17-256GB黑色6W4/774仅激活",4910,5999,""],["苹果","苹果17-256GB青雾蓝色6Y4/794",5710,5999,""],["苹果","苹果17-256GB青雾蓝色6Y4/794仅激活",4990,5999,""],["苹果","苹果17-256GB鼠尾草绿色714/7C4",5710,5999,""],["苹果","苹果17-256GB薰衣草紫色704/7A4",5710,5999,""],["苹果","苹果17-256GB薰衣草紫色704/7A4仅激活",5090,5999,""],["苹果","苹果17-512GB白色734/7E4",7630,7999,""],["苹果","苹果17-512GB黑色724/7D4",7660,7999,""],["苹果","苹果17-512GB青雾蓝色744/7F4",7710,7999,""],["苹果","苹果17-512GB鼠尾草绿色764/7H4",7710,7999,""],["苹果","苹果17-512GB薰衣草紫色754/7G4",7610,7999,""],["苹果","苹果17Air256GB浅金色344/3L4",5630,7999,""],["苹果","苹果17Air256GB深空黑色314/3H4",5710,7999,""],["苹果","苹果17Air256GB天蓝色364/3N4",5610,7999,""],["苹果","苹果17Air256GB云白色334/3K4",5680,7999,""],["苹果","苹果17Pro1TB深蓝色924/9C4",12310,12999,""],["苹果","苹果17Pro256GB星宇橙色8U4/944",7740,8999,""],["苹果","苹果17Pro256GB银色8T4/934",7840,8999,""],["苹果","苹果17Pro512GB星宇橙色8X4/974",9990,10999,""],["苹果","苹果17Pro512GB银色8W4/964",10210,10999,""],["苹果","苹果17ProMax256GB深蓝色054/0W4",8810,9999,""],["苹果","苹果17ProMax256GB星宇橙色044/0V4",8740,9999,""],["苹果","苹果17ProMax256GB银色034/0U4",9060,9999,""],["苹果","苹果17ProMax512GB星宇橙色074/104",10690,11999,""],["苹果","苹果17ProMax512GB银色064/0X4",11240,11999,""],["苹果","苹果18Pro 1TB 冰川蓝色TK4/U44",15120,15499,""],["苹果","苹果18Pro 1TB 黑色TG4/U04",15220,15499,""],["苹果","苹果18Pro 1TB 银色TH4/U14",15220,15499,""],["苹果","苹果18Pro 256GB 冰川蓝色TA4/TU4",9410,9999,""],["苹果","苹果18Pro 256GB 冰川蓝色TA4/TU4 仅激活",8860,9999,""],["苹果","苹果18Pro 256GB 勃艮第酒红色T94/TT4",9280,9999,""],["苹果","苹果18Pro 256GB 勃艮第酒红色T94/TT4 仅激活",8860,9999,""],["苹果","苹果18Pro 256GB 黑色T74/TQ4",9300,9999,""],["苹果","苹果18Pro 256GB 黑色T74/TQ4 仅激活",8790,9999,""],["苹果","苹果18Pro 256GB 银色T84/TR4",9510,9999,""],["苹果","苹果18Pro 256GB 银色T84/TR4 仅激活",8810,9999,""],["苹果","苹果18Pro 512GB 冰川蓝色TF4/TY4",11270,11999,""],["苹果","苹果18Pro 512GB 冰川蓝色TF4/TY4 仅激活",10690,11999,""],["苹果","苹果18Pro 512GB 勃艮第酒红色TE4/TX4",11280,11999,""],["苹果","苹果18Pro 512GB 勃艮第酒红色TE4/TX4 仅激活",10660,11999,""],["苹果","苹果18Pro 512GB 黑色TC4/TV4",11310,11999,""],["苹果","苹果18Pro 512GB 黑色TC4/TV4 仅激活",10420,11999,""],["苹果","苹果18Pro 512GB 银色TD4/TW4",11310,11999,""],["苹果","苹果18Pro 512GB 银色TD4/TW4 仅激活",10710,11999,""],["苹果","苹果18ProMax 1TB 冰川蓝色YJ4/044",15750,16499,""],["苹果","苹果18ProMax 1TB 勃艮第酒红色YH4/034",15970,16499,""],["苹果","苹果18ProMax 1TB 黑色YF4/YY4",16020,16499,""],["苹果","苹果18ProMax 1TB 银色YG4/004",16000,16499,""],["苹果","苹果18ProMax 256GB 冰川蓝色Y94/YT4",10510,10999,""],["苹果","苹果18ProMax 256GB 冰川蓝色Y94/YT4 仅激活",9940,10999,""],["苹果","苹果18ProMax 256GB 勃艮第酒红色Y84/YR4",10460,10999,""],["苹果","苹果18ProMax 256GB 勃艮第酒红色Y84/YR4 官网预激活",10510,10999,""],["苹果","苹果18ProMax 256GB 勃艮第酒红色Y84/YR4 仅激活",9910,10999,""],["苹果","苹果18ProMax 256GB 黑色Y64/YP4",10560,10999,""],["苹果","苹果18ProMax 256GB 黑色Y64/YP4 仅激活",9910,10999,""],["苹果","苹果18ProMax 256GB 银色Y74/YQ4",10560,10999,""],["苹果","苹果18ProMax 256GB 银色Y74/YQ4 官网预激活",10460,10999,""],["苹果","苹果18ProMax 256GB 银色Y74/YQ4 仅激活",9910,10999,""],["苹果","苹果18ProMax 2TB 冰川蓝色YN4/084",19460,21499,""],["苹果","苹果18ProMax 2TB 勃艮第酒红色YM4/074",19460,21499,""],["苹果","苹果18ProMax 2TB 黑色YK4/054",19460,21499,""],["苹果","苹果18ProMax 2TB 银色YL4/064",19470,21499,""],["苹果","苹果18ProMax 512GB 冰川蓝色YE4/YX4",12360,12999,""],["苹果","苹果18ProMax 512GB 冰川蓝色YE4/YX4 官网预激活",12310,12999,""],["苹果","苹果18ProMax 512GB 冰川蓝色YE4/YX4 仅激活",11720,12999,""],["苹果","苹果18ProMax 512GB 勃艮第酒红色YD4/YW4",12440,12999,""],["苹果","苹果18ProMax 512GB 勃艮第酒红色YD4/YW4 仅激活",11710,12999,""],["苹果","苹果18ProMax 512GB 黑色YA4/YU4",12320,12999,""],["苹果","苹果18ProMax 512GB 黑色YA4/YU4 仅激活",11410,12999,""],["苹果","苹果18ProMax 512GB 银色YC4/YV4",12520,12999,""],["苹果","苹果18ProMax 512GB 银色YC4/YV4 官网预激活",12360,12999,""],["苹果","苹果18ProMax 512GB 银色YC4/YV4 仅激活",11870,12999,""],["苹果","苹果20W USB-C充电器快充头-原封箱vw3",73,149,""],["苹果","苹果40W 动态电源适配器 (最高 60W) KP4",235,399,""],["苹果","苹果Duo 1TB 星光白色2T4/434 官网预激活",22020,0,""],["苹果","苹果Duo 1TB 星光白色2T4/434 仅激活",21020,21499,""],["苹果","苹果Duo 1TB 夜空色2U4/444 官网预激活",22220,0,""],["苹果","苹果Duo 1TB 夜空色2U4/444 仅激活",20320,21499,""],["苹果","苹果Duo 256GB 星光白色2M4/2X4 官网预激活",15800,15999,""],["苹果","苹果Duo 256GB 星光白色2M4/2X4 仅激活",15220,15999,""],["苹果","苹果Duo 256GB 夜空色2N4/2Y4 仅激活",15070,15999,""],["苹果","苹果Duo 256GB 夜空色2N4/2Y4官网预激活",15920,15999,""],["苹果","苹果Duo 512GB 星光白色2P4/404 官网预激活",17910,17999,""],["苹果","苹果编织快充线-USB-C转USB-C KJ3",108,145,""],["苹果","苹果耳机MXFT4 AirPods5(5代配无线充电盒)原封-USB-C口白",930,1149,""],["苹果","苹果耳机MXFW4irPods5(标准版)原封-USB-C口白",825,999,""],["苹果","苹果耳机MXP63CH/A AirPods4 耳机-国行原封-USB-C口白",675,999,""],["苹果","苹果耳机MXP93CH/A AirPods4 支持主动降噪耳机-国行原封-USB-C口白",795,1399,""],["苹果","苹果手表S12 GPS 42毫米黑色铝金属表壳黑色运动型表带M/L F04",2630,0,""],["苹果","苹果手表S12 GPS 42毫米黑色铝金属表壳黑色运动型表带S/M EY4",2580,0,""],["苹果","苹果手表S12 GPS 42毫米浅金色铝金属表壳沙砾色运动型表带M/L F24",2620,0,""],["苹果","苹果手表S12 GPS 42毫米浅金色铝金属表壳沙砾色运动型表带S/M F14",2595,0,""],["苹果","苹果手表S12 GPS 42毫米深古铜色铝金属表壳橄榄色运动型表带M/L F44",2610,0,""],["苹果","苹果手表S12 GPS 42毫米深古铜色铝金属表壳橄榄色运动型表带S/M F34",2580,0,""],["苹果","苹果手表S12 GPS 42毫米深空灰色铝金属表壳海军蓝色运动型表带M/L EX4",2575,0,""],["苹果","苹果手表S12 GPS 42毫米深空灰色铝金属表壳海军蓝色运动型表带S/M EV4",2570,0,""],["苹果","苹果手表S12 GPS 46毫米黑色铝金属表壳黑色运动型表带M/L FH4",2810,0,""],["苹果","苹果手表S12 GPS 46毫米黑色铝金属表壳黑色运动型表带S/M FG4",2810,0,""],["苹果","苹果手表S12 GPS 46毫米浅金色铝金属表壳沙砾色运动型表带M/L FK4",2855,0,""],["苹果","苹果手表S12 GPS 46毫米浅金色铝金属表壳沙砾色运动型表带S/M FJ4",2855,0,""],["苹果","苹果手表S12 GPS 46毫米深古铜色铝金属表壳橄榄色运动型表带M/L FM4",2810,0,""],["苹果","苹果手表S12 GPS 46毫米深古铜色铝金属表壳橄榄色运动型表带S/M FL4",2880,0,""],["苹果","苹果手表S12 GPS 46毫米深空灰色铝金属表壳海军蓝色运动型表带M/L FF4",2810,0,""],["苹果","苹果手表S12 GPS 46毫米深空灰色铝金属表壳海军蓝色运动型表带S/M FE4",2810,0,""],["苹果","苹果手表S12 蜂窝42毫米黑色铝金属表壳黑色运动型表带M/L HY4",3260,0,""],["苹果","苹果手表S12 蜂窝42毫米黑色铝金属表壳黑色运动型表带S/M HX4",3210,0,""],["苹果","苹果手表S12 蜂窝42毫米浅金色铝金属表壳沙砾色运动型表带M/L J14",3315,0,""],["苹果","苹果手表S12 蜂窝42毫米浅金色铝金属表壳沙砾色运动型表带S/M J04",3260,0,""],["苹果","苹果手表S12 蜂窝42毫米深古铜色铝金属表壳橄榄色运动型表带M/L J34",3220,0,""],["苹果","苹果手表S12 蜂窝42毫米深古铜色铝金属表壳橄榄色运动型表带S/M J24",3070,0,""],["苹果","苹果手表S12 蜂窝42毫米深空灰色铝金属表壳海军蓝色运动型表带M/L HW4",3160,0,""],["苹果","苹果手表S12 蜂窝42毫米深空灰色铝金属表壳海军蓝色运动型表带S/M HV4",3310,0,""],["苹果","苹果手表S12 蜂窝46毫米黑色铝金属表壳黑色运动型表带M/L J74",3430,0,""],["苹果","苹果手表S12 蜂窝46毫米黑色铝金属表壳黑色运动型表带S/M J64",3460,0,""],["苹果","苹果手表S12 蜂窝46毫米浅金色铝金属表壳沙砾色运动型表带M/L J94",3370,0,""],["苹果","苹果手表S12 蜂窝46毫米浅金色铝金属表壳沙砾色运动型表带S/M J84",3460,0,""],["苹果","苹果手表S12 蜂窝46毫米深古铜色铝金属表壳橄榄色运动型表带M/L JC4",3410,0,""],["苹果","苹果手表S12 蜂窝46毫米深古铜色铝金属表壳橄榄色运动型表带S/M JA4",3460,0,""],["苹果","苹果手表S12 蜂窝46毫米深空灰色铝金属表壳海军蓝色运动型表带M/L J54",3510,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳半透明黑色海洋表带CK4",5340,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳勃艮第酒红色高山回环式表带LCN4",5530,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳勃艮第酒红色高山回环式表带MCM4",5310,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳勃艮第酒红色高山回环式表带SCL4",5390,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳勃艮第酒红色野径回环式表带M/L CQ4",5360,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳勃艮第酒红色野径回环式表带S/M CP4",5370,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳黑色钛金属米兰尼斯表带LCJ4",6480,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳黑色钛金属米兰尼斯表带MCG4",6410,0,""],["苹果","苹果手表Ultra4蜂窝49毫米黑色钛金属表壳黑色钛金属米兰尼斯表带SCF4",6380,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳半透明灰色海洋表带C84",5440,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳沙砾色野径回环式表带M/L CE4",5510,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳沙砾色野径回环式表带S/M CD4",5510,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳沙漠色高山回环式表带LCC4",5510,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳沙漠色高山回环式表带MCA4",5490,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳沙漠色高山回环式表带SC94",5500,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳原色钛金属米兰尼斯表带LC74",6660,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳原色钛金属米兰尼斯表带MC64",6660,0,""],["苹果","苹果手表Ultra4蜂窝49毫米原色钛金属表壳原色钛金属米兰尼斯表带SC54",6510,0,""],["华为/荣耀笔记本","26款matebook14鸿蒙版 24+512G原野绿",5600,0,""],["OPPO","Find N5 16+1TB卫星版缎黑",8200,10999,""],["OPPO","Find N5 16+1TB卫星版玉白",8350,10999,""],["OPPO","Find N5 16+512缎黑",7850,9999,""],["OPPO","Find N5 16+512暮紫",8050,9999,""],["OPPO","Find N5 16+512玉白",7700,9999,""],["OPPO","Find N6 12+256金橙",7750,0,""],["OPPO","Find N6 12+256深黑",7750,0,""],["OPPO","Find N6 12+256原钛",7950,0,""],["OPPO","Find N6 16+512金橙",9550,0,""],["OPPO","Find N6 16+512深黑",9200,0,""],["OPPO","Find N6 16+T卫星版深黑",10350,0,""],["OPPO","Find N6 16+T卫星版原钛",10500,0,""],["OPPO","Find X10 12+256豫冰蓝",4860,5499,""],["OPPO","Find X10 12+256豫浅钛",4900,5499,""],["OPPO","Find X10 12+256豫清橙",4910,5499,""],["OPPO","Find X10 12+512豫冰蓝",5310,5999,""],["OPPO","Find X10 12+512豫浅钛",5210,5999,""],["OPPO","Find X10 12+512豫清橙",5310,5999,""],["OPPO","Find X10 16+512豫冰蓝",5710,6499,""],["OPPO","Find X10 16+512豫浅钛",6060,6499,""],["OPPO","Find X10 16+512豫清橙",5810,6499,""],["OPPO","Find X10promax 12+256豫月白",6100,6799,""],["OPPO","Find X10promax 12+512豫浅钛",6600,0,""],["OPPO","Find X10promax 12+512豫月白",6760,0,""],["OPPO","Find X10promax 16+1tb豫暖橙",7850,0,""],["OPPO","Find X10promax 16+1tb豫浅钛",8160,0,""],["OPPO","Find X10promax 16+512豫暖橙",7040,0,""],["OPPO","Find X10promax 16+512豫浅钛",7110,0,""],["OPPO","Find X10promax 16+512豫月白",7030,0,""],["OPPO","Find X9 12+256绒光钛",3685,4599,""],["OPPO","Find X9 12+256雾黑",3775,4599,""],["OPPO","Find X9 12+512豫绒光钛",3760,5299,""],["OPPO","Find X9 12+512豫霜白",4040,5299,""],["OPPO","Find X9 12+512豫雾黑",4010,5299,""],["OPPO","Find X9 12+512豫追光红",3995,5299,""],["OPPO","Find X9 16+512豫绒光钛",4260,5999,""],["OPPO","Find X9 16+512豫霜白",4260,5999,""],["OPPO","Find X9 16+512豫雾黑",4220,5999,""],["OPPO","Find X9 16+512豫追光红",4240,5999,""],["OPPO","Find X9pro 12+256霜白",4440,5599,""],["OPPO","Find X9pro 12+256追光红",4410,5599,""],["OPPO","Find X9pro 12+512豫霜白",4790,0,""],["OPPO","Find X9pro 12+512豫追光红",4785,0,""],["OPPO","Find X9pro 16+1TB豫绒砂钛",5960,0,""],["OPPO","Find X9pro 16+512豫绒砂钛",4910,6299,""],["OPPO","Find X9pro 16+512豫霜白",4955,6299,""],["OPPO","Find X9spro 12+256乘风青",4010,5299,""],["OPPO","Find X9spro 12+256元气橙",4190,5299,""],["OPPO","Find X9spro 12+256原生钛",4005,5299,""],["OPPO","Find X9spro 12+256自在白",4010,5299,""],["OPPO","Find X9spro 12+512乘风青",4390,5699,""],["OPPO","Find X9spro 12+512元气橙",4415,5699,""],["OPPO","Find X9spro 12+512原生钛",4525,5699,""],["OPPO","Find X9spro 12+512自在白",4360,5699,""],["OPPO","Find X9spro 16+1TB乘风青",5540,6999,""],["OPPO","Find X9spro 16+1TB原生钛",6025,6999,""],["OPPO","Find X9spro 16+1TB自在白",5955,6999,""],["OPPO","Find X9spro 16+512乘风青",4640,5999,""],["OPPO","Find X9spro 16+512元气橙",4860,5999,""],["OPPO","Find X9spro 16+512原生钛",4640,5999,""],["OPPO","Find X9spro 16+512自在白",4650,5999,""],["OPPO","Find X9Ultra 12+512大地苔原",6860,7999,""],["OPPO","Find X9Ultra 12+512极地冰川",6810,7999,""],["OPPO","Find X9Ultra 12+512绒砂峡谷",6850,7999,""],["OPPO","Find X9Ultra 16+1TB卫星通信版大地苔原",8050,9499,""],["OPPO","Find X9Ultra 16+1TB卫星通信版极地冰川",7900,9499,""],["OPPO","Find X9Ultra 16+1TB卫星通信版绒砂峡谷",7900,9499,""],["OPPO","Find X9Ultra 16+512大地苔原",7210,8499,""],["OPPO","Find X9Ultra 16+512绒砂峡谷",7100,8499,""],["OPPO","OPPO A3i 12+256静夜黑",1720,0,""],["OPPO","OPPO A3i 6+128静夜黑",1145,0,""],["OPPO","OPPO A3i 6+128星辰紫",1145,0,""],["OPPO","OPPO A3i 8+128静夜黑",1260,0,""],["OPPO","OPPO A3i 8+128星辰紫",1240,0,""],["OPPO","OPPO A5X 6+128玄武黑",1120,0,""],["OPPO","OPPO A5X 6+128钻石白",1150,0,""],["OPPO","OPPO A5x 8+256水晶粉",1480,0,""],["OPPO","OPPO A5活力版 12+256豫琥珀黑",1635,0,""],["OPPO","OPPO A5活力版 12+256豫玛瑙粉",1715,0,""],["OPPO","OPPO A5活力版 8+256玛瑙粉",1505,0,""],["OPPO","OPPO A6 12+256粉梦生花",1925,0,""],["OPPO","OPPO A6 12+256丝绒灰",1920,0,""],["OPPO","OPPO A6 12+512豫丝绒灰",2160,0,""],["OPPO","OPPO A6C 6+128橄榄绿",995,0,""],["OPPO","OPPO A6C 6+128幽兰紫",985,0,""],["OPPO","OPPO A6i 6+128午夜黑",1120,0,""],["OPPO","OPPO A6i 6+128云雾白",1110,0,""],["OPPO","OPPO A6i 8+128云雾白",1225,0,""],["OPPO","OPPO A6i 8+256午夜黑",1535,0,""],["OPPO","OPPO A6i 8+256云雾白",1505,0,""],["OPPO","OPPO A6K 12+256豫暮光蓝",1810,2399,""],["OPPO","OPPO A6K 12+256豫曙光金",1810,2399,""],["OPPO","OPPO A6K 8+256豫海贝白",1615,1999,""],["OPPO","OPPO A6K 8+512豫海贝白",1735,2199,""],["OPPO","OPPO A6K 8+512豫暮光蓝",1710,2199,""],["OPPO","OPPO A6s 12+256豫海贝白",1750,0,""],["OPPO","OPPO A6s 8+256曙光金",1520,0,""],["OPPO","OPPO A6spro 12+256豫青云直上",2010,0,""],["OPPO","OPPO A6spro 12+256豫夜月生辉",1995,0,""],["OPPO","OPPO A6spro 12+512青云直上",2250,0,""],["OPPO","OPPO A6t 6+128墨竹黑",1160,0,""],["OPPO","OPPO A6t 6+128青出于蓝",1125,0,""],["OPPO","OPPO A6t 6+128紫气东来",1145,0,""],["OPPO","OPPO A6t 6+256墨竹黑",1515,0,""],["OPPO","OPPO A6t 6+256青出于蓝",1515,0,""],["OPPO","OPPO A6t 6+256紫气东来",1610,0,""],["OPPO","OPPO A6X 6+128墨竹黑",1155,0,""],["OPPO","OPPO A6X 6+128青出于蓝",1155,0,""],["OPPO","OPPO A6X 6+128紫气东来",1155,0,""],["OPPO","OPPO A6X 6+256青出于蓝",1470,0,""],["OPPO","OPPO A7pro6+256步步生花",1710,0,""],["OPPO","OPPO A7pro6+256乘风破浪",1720,0,""],["OPPO","OPPO A7pro6+256大漠棕",1750,0,""],["OPPO","OPPO A7pro8+256步步生花",2000,0,""],["OPPO","OPPO A7pro8+256大漠棕",1950,0,""],["OPPO","OPPO A7promax12+256豫乘风破浪",2185,0,""],["OPPO","OPPO A7promax12+256豫前橙似锦",2195,0,""],["OPPO","OPPO A7promax12+256豫远山黑",2160,0,""],["OPPO","OPPO A7promax12+512豫乘风破浪",2460,0,""],["OPPO","OPPO A7promax12+512远山黑",2430,0,""],["OPPO","OPPO K12s 12+256棱镜黑",1705,0,""],["OPPO","OPPO K12s 12+256星芒白",1715,0,""],["OPPO","OPPO K12s 8+128棱镜黑",1305,0,""],["OPPO","OPPO K12s 8+128星芒白",1345,0,""],["OPPO","OPPO K13Turbopro 12+256骑士银",2465,0,""],["OPPO","OPPO K13Turbopro 16+256骑士银",2555,0,""],["OPPO","OPPO K13Turbopro 16+512初号紫",2895,0,""],["OPPO","OPPO K13Turbopro 16+512黑武士",3160,0,""],["OPPO","OPPO K13Turbopro 16+512骑士银",2895,0,""],["OPPO","OPPO K15pro 12+256赛博光翼",2740,0,""],["OPPO","OPPO K15pro 12+512光尘粉",2910,0,""],["OPPO","OPPO K15pro 12+512赛博光翼",2910,0,""],["OPPO","OPPO Pad5 8+256WIFI星河银",2710,0,""],["OPPO","OPPO Pad6 12+256WIFI深空灰",3215,0,""],["OPPO","OPPO Pad6 12+256WIFI星河银",3260,0,""],["OPPO","OPPO Pad6 8+256WIFI星河银",2865,0,""],["OPPO","Reno14 12+256半夏绿",2510,2799,""],["OPPO","Reno14 12+256礁石黑",2410,2799,""],["OPPO","Reno14 12+256人鱼姬",2410,2799,""],["OPPO","Reno14 12+512礁石黑",2740,3099,""],["OPPO","Reno14 12+512人鱼姬",2810,3099,""],["OPPO","Reno15 12+256极光蓝",2695,2999,""],["OPPO","Reno15 12+256可露丽棕",2730,2999,""],["OPPO","Reno15 12+256星光蝴蝶结",2735,2999,""],["OPPO","Reno15 12+512豫可露丽棕",2965,3299,""],["OPPO","Reno15 12+512豫星光蝴蝶结",2875,3299,""],["OPPO","Reno15 16+512豫可露丽棕",3210,3599,""],["OPPO","Reno15 16+512豫星光蝴蝶结",3110,3599,""],["OPPO","Reno15C 12+256豫极光蓝",2590,2899,""],["OPPO","Reno15C 12+256豫星光蝴蝶结",2610,2899,""],["OPPO","Reno15C 12+256豫学院蓝",2585,2899,""],["OPPO","Reno15C 12+512豫学院蓝",2810,3199,""],["OPPO","Reno15pro 12+256可露丽棕",2810,3699,""],["OPPO","Reno15pro 12+256星光蝴蝶结",2865,3699,""],["OPPO","Reno15pro 12+512豫可露丽棕",3025,3999,""],["OPPO","Reno15pro 12+512豫星光蝴蝶结",3310,3999,""],["OPPO","Reno15pro 16+512豫可露丽棕",3390,4299,""],["OPPO","Reno15pro 16+512豫星光蝴蝶结",3560,4299,""],["OPPO","Reno16 12+256豫怦然星动",2995,3499,""],["OPPO","Reno16 12+256豫星河紫",3055,3499,""],["OPPO","Reno16 12+256豫月夜黑",2975,3499,""],["OPPO","Reno16 12+512豫怦然星动",3380,3999,""],["OPPO","Reno16 12+512豫星河紫",3410,3999,""],["OPPO","Reno16 12+512豫月夜黑",3365,3999,""],["OPPO","Reno16 16+1TB豫怦然星动",4445,4899,""],["OPPO","Reno16 16+256豫怦然星动",3260,3899,""],["OPPO","Reno16 16+256豫星河紫",3260,3899,""],["OPPO","Reno16 16+256豫月夜黑",3170,3899,""],["OPPO","Reno16 16+512豫怦然星动",3810,4299,""],["OPPO","Reno16 16+512豫星河紫",3610,4299,""],["OPPO","Reno16 16+512豫月夜黑",3635,4299,""],["OPPO","Reno16pro 12+256豫梦境蓝",3510,4499,""],["OPPO","Reno16pro 12+256豫月夜黑",3395,4499,""],["OPPO","Reno16pro 12+512豫梦境蓝",4180,4899,""],["OPPO","Reno16pro 12+512豫怦然星动",4180,4899,""],["OPPO","Reno16pro 12+512豫月夜黑",4110,4899,""],["OPPO","Reno16pro 16+512豫月夜黑",4410,5299,""],["OPPO","Reno16pro 16+512怦然星动",4390,5299,""],["OPPO","Reno16T 12+256豫星河紫",3160,3699,""],["OPPO","Reno16T 16+512豫怦然星动",3525,4499,""],["OPPO","Reno16T 16+512豫星河紫",3635,4499,""],["OPPO","Reno16T 16+512豫月夜黑",3730,4499,""],["华为","Hi 畅享80 6+128曜石黑",995,999,""],["华为","Hi 畅享80 8+256流光金",1195,1399,""],["华为","Hi 畅享80 8+256曜石黑",1195,1399,""],["华为","Hi 畅享80 8+256珍珠白",1195,1399,""],["华为","Hi 畅享80plus 12+256幻夜黑",1325,1499,""],["华为","Hi 畅享80plus 12+256雅川青",1325,1499,""],["华为","Hi 畅享80plus 12+256珍珠白",1335,1499,""],["华为","Hi 畅享80plus 12+512幻夜黑",1655,1699,""],["华为","Hi 畅享80plus 12+512珍珠白",1645,1699,""],["华为","Hi 畅享80pro 12+256晨光白",1355,1799,""],["华为","Hi 畅享80pro 12+256星海蓝",1365,1799,""],["华为","Hi 畅享80pro 12+256星空黑",1335,1799,""],["华为","Hi 畅享80pro 12+512晨光白",1635,1999,""],["华为","Hi 畅享80pro 12+512星海蓝",1675,1999,""],["华为","Hi 畅享80pro 12+512星空黑",1815,1999,""],["华为","Hi 畅享80pro 8+256晨光白",1255,1599,""],["华为","Hi 畅享80pro 8+256星海蓝",1265,1599,""],["华为","Hi 畅享80pro 8+256星空黑",1245,1599,""],["华为","Hi 畅享80s 6+128晴空蓝",995,1499,""],["华为","Hi 畅享80s 6+128曜石黑",995,1499,""],["华为","Hi 畅享80s 6+128珍珠白",995,1499,""],["华为","Hi 畅享80s 8+256晴空蓝",1235,1999,""],["华为","Hi 畅享80s 8+256曜石黑",1235,1999,""],["华为","Hi 畅享80s 8+256珍珠白",1235,1999,""],["华为","Mate70 12+1T风信紫",4520,6999,""],["华为","Mate70 12+1T雪域白",4450,6999,""],["华为","Mate70 12+1T曜石黑",4400,6999,""],["华为","Mate70 12+1T云杉绿",4500,6999,""],["华为","Mate70 12+256曜石黑",3400,5499,""],["华为","Mate70 12+256云杉绿",3350,5499,""],["华为","Mate70 12+512鸿蒙NEXT先锋版风信紫",3350,5999,""],["华为","Mate70 12+512鸿蒙NEXT先锋版雪域白",3350,5999,""],["华为","Mate70 12+512鸿蒙NEXT先锋版云杉绿",3250,5999,""],["华为","Mate70 12+512雪域白",3800,5999,""],["华为","Mate70 12+512曜石黑",3850,5999,""],["华为","Mate70 12+512云杉绿",3550,5999,""],["华为","Mate70Air 12+256曜金黑",3200,4199,""],["华为","Mate70Air 12+256羽衣白",3200,4199,""],["华为","Mate70Air 12+512豫金丝银锦",3400,4699,""],["华为","Mate70Air 12+512豫曜金黑",3300,4699,""],["华为","Mate70Air 12+512金丝银锦",3450,4699,""],["华为","Mate70Air 12+512曜金黑",3350,4699,""],["华为","Mate70Air 12+512羽衣白",3350,4699,""],["华为","Mate70Pro 12+1T鸿蒙NEXT先锋版雪域白",4800,7999,""],["华为","Mate70Pro 12+1T鸿蒙NEXT先锋版曜石黑",4700,7999,""],["华为","Mate70Pro 12+1T鸿蒙NEXT先锋版云杉绿",4350,7999,""],["华为","Mate70Pro 12+1T雪域白",5000,7999,""],["华为","Mate70Pro 12+1T曜石黑",5000,7999,""],["华为","Mate70Pro 12+1T云杉绿",4950,7999,""],["华为","Mate70Pro 12+256风信紫",3650,6499,""],["华为","Mate70Pro 12+256雪域白",3650,6499,""],["华为","Mate70Pro 12+256曜石黑",3650,6499,""],["华为","Mate70Pro 12+256优享版风信紫",3580,6499,""],["华为","Mate70Pro 12+256优享版雪域白",3350,6499,""],["华为","Mate70Pro 12+256优享版曜石黑",3650,6499,""],["华为","Mate70Pro 12+256优享版云杉绿",3450,6499,""],["华为","Mate70Pro 12+256云杉绿",3550,6499,""],["华为","Mate70Pro 12+512风信紫",3800,6999,""],["华为","Mate70Pro 12+512鸿蒙NEXT先锋版风信紫",3800,6999,""],["华为","Mate70Pro 12+512鸿蒙NEXT先锋版雪域白",3600,6999,""],["华为","Mate70Pro 12+512鸿蒙NEXT先锋版曜石黑",3700,6999,""],["华为","Mate70Pro 12+512鸿蒙NEXT先锋版云杉绿",3650,6999,""],["华为","Mate70Pro 12+512雪域白",3900,6999,""],["华为","Mate70Pro 12+512曜石黑",4000,6999,""],["华为","Mate70Pro 12+512优享版风信紫",3830,6999,""],["华为","Mate70Pro 12+512优享版鸿蒙NEXT先锋版风信紫",3750,6999,""],["华为","Mate70Pro 12+512优享版鸿蒙NEXT先锋版雪域白",3700,6999,""],["华为","Mate70Pro 12+512优享版鸿蒙NEXT先锋版曜石黑",3700,6999,""],["华为","Mate70Pro 12+512优享版鸿蒙NEXT先锋版云杉绿",3700,6999,""],["华为","Mate70Pro 12+512优享版雪域白",3650,6999,""],["华为","Mate70Pro 12+512优享版曜石黑",3500,6999,""],["华为","Mate70Pro 12+512优享版云杉绿",3400,6999,""],["华为","Mate70Pro 12+512云杉绿",3805,6999,""],["华为","Mate70Pro 16+512风信紫",4400,8499,""],["华为","Mate70Pro 16+512雪域白",4450,8499,""],["华为","Mate70Pro 16+512云杉绿",4400,8499,""],["华为","Mate70Pro+ 16+1T飞天青",5450,9499,""],["华为","Mate70Pro+ 16+1T金丝银锦",5800,9499,""],["华为","Mate70Pro+ 16+1T墨韵黑",5900,9499,""],["华为","Mate70Pro+ 16+1T羽衣白",5250,9499,""],["华为","Mate70Pro+ 16+512飞天青",4500,8499,""],["华为","Mate70Pro+ 16+512金丝银锦",4500,8499,""],["华为","Mate70Pro+ 16+512墨韵黑",4700,8499,""],["华为","Mate70Pro+ 16+512羽衣白",4600,8499,""],["华为","Mate70RS非凡大师 16+1T瑞红",8950,12999,""],["华为","Mate70RS非凡大师 16+512玄黑",7750,11999,""],["华为","Mate80 12+256晨曦金",4080,5499,""],["华为","Mate80 12+256雪域白",4050,5499,""],["华为","Mate80 12+256曜石黑",4080,5499,""],["华为","Mate80 12+512晨曦金",4320,5999,""],["华为","Mate80 12+512豫晨曦金",4250,5999,""],["华为","Mate80 12+512雪域白",4400,5999,""],["华为","Mate80 12+512曜石黑",4300,5999,""],["华为","Mate80 12+512云杉绿",4400,5999,""],["华为","Mate80 16+512豫晨曦金",4750,6299,""],["华为","Mate80 16+512豫雪域白",4650,6299,""],["华为","Mate80 16+512雪域白",4700,6299,""],["华为","Mate80 16+512曜石黑",4820,6299,""],["华为","Mate80 16+512云杉绿",4800,6299,""],["华为","Mate80Pro 12+256晨曦金",5100,6999,""],["华为","Mate80Pro 12+256雪域白",5200,6999,""],["华为","Mate80Pro 12+256曜石黑",5200,6999,""],["华为","Mate80Pro 12+256云杉绿",5050,6999,""],["华为","Mate80Pro 12+512晨曦金",5350,7499,""],["华为","Mate80Pro 12+512豫晨曦金",5250,7499,""],["华为","Mate80Pro 12+512豫云杉绿",5250,7499,""],["华为","Mate80Pro 12+512雪域白",5670,7499,""],["华为","Mate80Pro 12+512曜石黑",5400,7499,""],["华为","Mate80Pro 12+512云杉绿",5350,7499,""],["华为","Mate80Pro 16+1T晨曦金",6950,8999,""],["华为","Mate80Pro 16+1T豫晨曦金",6700,8999,""],["华为","Mate80Pro 16+1T豫雪域白",6900,8999,""],["华为","Mate80Pro 16+1T豫曜石黑",6900,8999,""],["华为","Mate80Pro 16+1T豫云杉绿",6900,8999,""],["华为","Mate80Pro 16+1T雪域白",7030,8999,""],["华为","Mate80Pro 16+1T曜石黑",7000,8999,""],["华为","Mate80Pro 16+1T云杉绿",7000,8999,""],["华为","Mate80Pro 16+512晨曦金",5950,7999,""],["华为","Mate80Pro 16+512豫晨曦金",5800,7999,""],["华为","Mate80Pro 16+512豫雪域白",6300,7999,""],["华为","Mate80Pro 16+512豫曜石黑",6150,7999,""],["华为","Mate80Pro 16+512豫云杉绿",5650,7999,""],["华为","Mate80Pro 16+512雪域白",6370,7999,""],["华为","Mate80Pro 16+512云杉绿",5900,7999,""],["华为","Mate80ProMax 16+1T豫极地银",7400,9999,""],["华为","Mate80ProMax 16+1T豫极光青",7400,9999,""],["华为","Mate80ProMax 16+1T豫极夜黑",7450,9999,""],["华为","Mate80ProMax 16+1T豫极昼金",7400,9999,""],["华为","Mate80ProMax 16+1T极地银",7600,9999,""],["华为","Mate80ProMax 16+1T极光青",7550,9999,""],["华为","Mate80ProMax 16+1T极夜黑",7500,9999,""],["华为","Mate80ProMax 16+1T极昼金",7550,9999,""],["华为","Mate80ProMax 16+512豫极地银",6350,8999,""],["华为","Mate80ProMax 16+512豫极光青",6300,8999,""],["华为","Mate80ProMax 16+512豫极夜黑",6550,8999,""],["华为","Mate80ProMax 16+512豫极昼金",6250,8999,""],["华为","Mate80ProMax 16+512极地银",6450,8999,""],["华为","Mate80ProMax 16+512极光青",6450,8999,""],["华为","Mate80ProMax 16+512极夜黑",6620,8999,""],["华为","Mate80ProMax 16+512极昼金",6400,8999,""],["华为","Mate80RS非凡大师 20+1T皓白",10550,12999,""],["华为","Mate80RS非凡大师 20+1T豫皓白",10450,12999,""],["华为","Mate80RS非凡大师 20+1T豫槿紫",10450,12999,""],["华为","Mate80RS非凡大师 20+1T豫玄黑",10650,12999,""],["华为","Mate80RS非凡大师 20+1T槿紫",10800,12999,""],["华为","Mate80RS非凡大师 20+1T玄黑",10700,12999,""],["华为","Mate80RS非凡大师 20+512皓白",9750,11999,""],["华为","Mate80RS非凡大师 20+512豫槿紫",9500,11999,""],["华为","Mate80RS非凡大师 20+512豫玄黑",9400,11999,""],["华为","Mate80RS非凡大师 20+512槿紫",9750,11999,""],["华为","Mate80RS非凡大师 20+512玄黑",9650,11999,""],["华为","Mate90 12+1T晶钻白",7750,8499,""],["华为","Mate90 12+1T曜石黑",7400,8499,""],["华为","Mate90 12+256豫晶格粉",5000,5999,""],["华为","Mate90 12+256豫晶格绿",5000,5999,""],["华为","Mate90 12+256豫晶钻白",5000,5999,""],["华为","Mate90 12+256晶格粉",5100,5999,""],["华为","Mate90 12+256晶格绿",5200,5999,""],["华为","Mate90 12+256晶钻白",5150,5999,""],["华为","Mate90 12+256曜石黑",5150,5999,""],["华为","Mate90 12+512豫晶格粉",5900,6999,""],["华为","Mate90 12+512豫晶格绿",5900,6999,""],["华为","Mate90 12+512豫晶钻白",5950,6999,""],["华为","Mate90 12+512豫曜石黑",5700,6999,""],["华为","Mate90 12+512晶格粉",6150,6999,""],["华为","Mate90 12+512晶格绿",6100,6999,""],["华为","Mate90 12+512晶钻白",6100,6999,""],["华为","Mate90 12+512曜石黑",6100,6999,""],["华为","Mate90Pro 12+256翡冷翠",6180,6999,""],["华为","Mate90Pro 12+256琥珀橙",5950,6999,""],["华为","Mate90Pro 12+256晶钻白",6200,6999,""],["华为","Mate90Pro 12+256曜石黑",6100,6999,""],["华为","Mate90Pro 12+512翡冷翠",7030,7999,""],["华为","Mate90Pro 12+512豫翡冷翠",6850,7999,""],["华为","Mate90Pro 12+512豫琥珀橙",6950,7999,""],["华为","Mate90Pro 12+512豫晶钻白",6850,7999,""],["华为","Mate90Pro 12+512豫曜石黑",6900,7999,""],["华为","Mate90Pro 12+512琥珀橙",7100,7999,""],["华为","Mate90Pro 12+512晶钻白",7050,7999,""],["华为","Mate90Pro 12+512曜石黑",7050,7999,""],["华为","Mate90Pro 16+1T曜石黑",9200,9999,""],["华为","Mate90Pro 16+512翡冷翠",7600,8499,""],["华为","Mate90Pro 16+512豫翡冷翠",7500,8499,""],["华为","Mate90Pro 16+512豫琥珀橙",7650,8499,""],["华为","Mate90Pro 16+512豫晶钻白",7550,8499,""],["华为","Mate90Pro 16+512豫曜石黑",7400,8499,""],["华为","Mate90Pro 16+512琥珀橙",7800,8499,""],["华为","Mate90Pro 16+512晶钻白",7650,8499,""],["华为","Mate90Pro 16+512曜石黑",7500,8499,""],["华为","Mate90ProMax 12+512翡冷翠",8250,9499,""],["华为","Mate90ProMax 12+512晶钻白",8200,9499,""],["华为","Mate90ProMax 12+512玫瑰金",8200,9499,""],["华为","Mate90ProMax 12+512曜石黑",8250,9499,""],["华为","Mate90ProMax 16+1T典藏版翡冷翠",11750,12999,""],["华为","Mate90ProMax 16+1T典藏版豫翡冷翠",11500,12999,""],["华为","Mate90ProMax 16+1T典藏版豫晶钻白",11750,12999,""],["华为","Mate90ProMax 16+1T典藏版豫玫瑰金",11600,12999,""],["华为","Mate90ProMax 16+1T典藏版豫曜石黑",12000,12999,""],["华为","Mate90ProMax 16+1T典藏版晶钻白",11900,12999,""],["华为","Mate90ProMax 16+1T典藏版玫瑰金",11850,12999,""],["华为","Mate90ProMax 16+1T典藏版曜石黑",12200,12999,""],["华为","Mate90ProMax 16+512典藏版翡冷翠",9700,9999,""],["华为","Mate90ProMax 16+512典藏版豫翡冷翠",9400,9999,""],["华为","Mate90ProMax 16+512典藏版豫晶钻白",9750,9999,""],["华为","Mate90ProMax 16+512典藏版豫玫瑰金",9600,9999,""],["华为","Mate90ProMax 16+512典藏版豫曜石黑",9650,9999,""],["华为","Mate90ProMax 16+512典藏版晶钻白",9950,9999,""],["华为","Mate90ProMax 16+512典藏版玫瑰金",9850,9999,""],["华为","Mate90ProMax 16+512典藏版曜石黑",9750,9999,""],["华为","Mate90ProMax 16+512翡冷翠",9000,9999,""],["华为","Mate90ProMax 16+512豫翡冷翠",8600,9999,""],["华为","Mate90ProMax 16+512豫晶钻白",8600,9999,""],["华为","Mate90ProMax 16+512豫玫瑰金",8600,9999,""],["华为","Mate90ProMax 16+512豫曜石黑",8800,9999,""],["华为","Mate90ProMax 16+512晶钻白",8950,9999,""],["华为","Mate90ProMax 16+512玫瑰金",9000,9999,""],["华为","Mate90ProMax 16+512曜石黑",9000,9999,""],["华为","Mate90RS非凡大师 16+1T皓白",14450,14999,""],["华为","Mate90RS非凡大师 16+1T豫皓白",14000,14999,""],["华为","Mate90RS非凡大师 16+1T豫瑞红",14300,14999,""],["华为","Mate90RS非凡大师 16+1T豫玄黑",14200,14999,""],["华为","Mate90RS非凡大师 16+1T瑞红",14650,14999,""],["华为","Mate90RS非凡大师 16+1T玄黑",14600,14999,""],["华为","Mate90RS非凡大师 16+512豫皓白",12900,12999,""],["华为","Mate90RS非凡大师 16+512豫玄黑",12900,12999,""],["华为","MateXT2非凡大师 16+1T皓白",23400,23999,""],["华为","MateXT2非凡大师 16+1T锦紫",23850,23999,""],["华为","MateXT2非凡大师 16+1T灵盾防窥屏皓白",24300,0,""],["华为","MateXT2非凡大师 16+1T灵盾防窥屏豫玄黑",24800,0,""],["华为","MateXT2非凡大师 16+1T灵盾防窥屏锦紫",25000,0,""],["华为","MateXT2非凡大师 16+1T玄黑",23800,23999,""],["华为","MateXT2非凡大师 16+512皓白",21750,21999,""],["华为","MateXT2非凡大师 16+512锦紫",21700,21999,""],["华为","MateXT2非凡大师 16+512玄黑",22000,0,""],["华为","MateXTs非凡大师 16+1T皓白",14050,21999,""],["华为","MateXTs非凡大师 16+1T槿紫",14600,21999,""],["华为","MateXTs非凡大师 16+1T瑞红",14650,21999,""],["华为","MateXTs非凡大师 16+1T玄黑",14600,21999,""],["华为","MateXTs非凡大师 16+512皓白",14000,19999,""],["华为","MateXTs非凡大师 16+512槿紫",13500,19999,""],["华为","MateXTs非凡大师 16+512瑞红",14000,19999,""],["华为","MateXTs非凡大师 16+512玄黑",14450,19999,""],["华为","MateXT非凡大师 16+512瑞红",11700,21999,""],["华为","nova Flip 256零度白",3425,5288,""],["华为","nova Flip 256向新绿",3325,5288,""],["华为","nova Flip 512向新绿",3465,5688,""],["华为","nova FlipS 256向新绿",3325,3488,""],["华为","nova FlipS 512向新绿",3785,3788,""],["华为","nova14 12+512(昆仑玻璃)冰晶蓝",2015,3199,""],["华为","nova14 12+512(昆仑玻璃)凝霜白",1995,3199,""],["华为","nova14 12+512(昆仑玻璃)羽砂黑",2205,3199,""],["华为","nova14 12+512冰晶蓝",2045,2999,""],["华为","nova14 12+512凝霜白",2035,2999,""],["华为","nova14 12+512羽砂黑",2085,2999,""],["华为","nova14Pro 12+256冰晶粉",1915,3499,""],["华为","nova14Pro 12+256凝霜白",1895,3499,""],["华为","nova14Pro 12+256羽砂黑",1895,3499,""],["华为","nova14Pro 12+512(昆仑玻璃)冰晶粉",2215,3999,""],["华为","nova14Pro 12+512(昆仑玻璃)凝霜白",2205,3999,""],["华为","nova14Pro 12+512(昆仑玻璃)羽砂黑",2215,3999,""],["华为","nova14Pro 12+512冰晶粉",2125,3799,""],["华为","nova14Pro 12+512冰晶蓝",2145,3799,""],["华为","nova14Pro 12+512凝霜白",2105,3799,""],["华为","nova14Ultra 12+256浮光白",2265,4199,""],["华为","nova14Ultra 12+256浮光金",2255,4199,""],["华为","nova14Ultra 12+256流光紫",2315,4199,""],["华为","nova14Ultra 12+256曜金黑",2265,4199,""],["华为","nova14Ultra 12+512浮光白",2475,4499,""],["华为","nova14Ultra 12+512浮光金",2515,4499,""],["华为","nova14Ultra 12+512流光紫",2575,4499,""],["华为","nova14Ultra 12+512曜金黑",2465,4499,""],["华为","nova14活力版 12+256冰晶蓝",1595,2199,""],["华为","nova14活力版 12+256凝霜白",1595,2199,""],["华为","nova14活力版 12+256羽砂黑",1595,2199,""],["华为","nova14活力版 12+512冰晶蓝",1825,2499,""],["华为","nova14活力版 12+512凝霜白",1815,2499,""],["华为","nova14活力版 12+512羽砂黑",1825,2499,""],["华为","nova15 256G带感绿",1935,2999,""],["华为","nova15 256G好搭紫",1965,2999,""],["华为","nova15 256G幻夜黑",2005,2999,""],["华为","nova15 256G零度白",1995,2999,""],["华为","nova15 512G带感绿",2165,3299,""],["华为","nova15 512G好搭紫",2215,3299,""],["华为","nova15 512G幻夜黑",2225,3299,""],["华为","nova15 512G零度白",2215,3299,""],["华为","nova15Pro 256G(昆仑玻璃)带感绿",2385,3899,""],["华为","nova15Pro 256G(昆仑玻璃)好搭紫",2465,3899,""],["华为","nova15Pro 256G(昆仑玻璃)幻夜黑",2475,3899,""],["华为","nova15Pro 256G(昆仑玻璃)零度白",2485,3899,""],["华为","nova15Pro 512G(昆仑玻璃)带感绿",2685,4199,""],["华为","nova15Pro 512G(昆仑玻璃)好搭紫",2705,4199,""],["华为","nova15Pro 512G(昆仑玻璃)幻夜黑",2755,4199,""],["华为","nova15Pro 512G(昆仑玻璃)零度白",2805,4199,""],["华为","nova15Ultra 256G(昆仑玻璃)带感绿",2905,4499,""],["华为","nova15Ultra 256G(昆仑玻璃)好搭紫",2985,4499,""],["华为","nova15Ultra 256G(昆仑玻璃)幻夜黑",2925,4499,""],["华为","nova15Ultra 256G(昆仑玻璃)零度白",2945,4499,""],["华为","nova15Ultra 512G(昆仑玻璃)带感绿",3095,4799,""],["华为","nova15Ultra 512G(昆仑玻璃)好搭紫",3115,4799,""],["华为","nova15Ultra 512G(昆仑玻璃)幻夜黑",3205,4799,""],["华为","nova15Ultra 512G(昆仑玻璃)零度白",3095,4799,""],["华为","nova16 12+256G豫晴空蓝",2425,3399,""],["华为","nova16 12+256G幻彩贝母",2455,3399,""],["华为","nova16 12+256G晴空蓝",2465,3399,""],["华为","nova16 12+256G天际白",2465,3399,""],["华为","nova16 12+256G星空黑",2465,3399,""],["华为","nova16 12+512G幻彩贝母",2805,3899,""],["华为","nova16 12+512G晴空蓝",2765,3899,""],["华为","nova16 12+512G天际白",2765,3899,""],["华为","nova16 12+512G星空黑",2805,3899,""],["华为","nova16Pro 12+256G豫星空黑",3005,4299,""],["华为","nova16Pro 12+256G幻彩贝母",3105,4299,""],["华为","nova16Pro 12+256G晴空蓝",3155,4299,""],["华为","nova16Pro 12+256G天际白",3105,4299,""],["华为","nova16Pro 12+256G星空黑",3105,4299,""],["华为","nova16Pro 12+512G豫幻彩贝母",3435,4799,""],["华为","nova16Pro 12+512G豫晴空蓝",3485,4799,""],["华为","nova16Pro 12+512G豫星空黑",3325,4799,""],["华为","nova16Pro 12+512G幻彩贝母",3505,4799,""],["华为","nova16Pro 12+512G晴空蓝",3525,4799,""],["华为","nova16Pro 12+512G天际白",3525,4799,""],["华为","nova16Pro 12+512G星空黑",3505,4799,""],["华为","nova16SE 8+256G豫破晓橙",2225,2899,""],["华为","nova16SE 8+256G豫天际白",2155,2899,""],["华为","nova16SE 8+256G豫樱雪晴空",2235,2899,""],["华为","nova16SE 8+256G破晓橙",2255,2899,""],["华为","nova16SE 8+256G天际白",2215,2899,""],["华为","nova16SE 8+256G星空黑",2255,2899,""],["华为","nova16SE 8+256G樱雪晴空",2275,2899,""],["华为","nova16SE 8+512G豫星空黑",2595,3399,""],["华为","nova16SE 8+512G破晓橙",2625,3399,""],["华为","nova16SE 8+512G天际白",2635,3399,""],["华为","nova16SE 8+512G星空黑",2675,3399,""],["华为","nova16Ultra 12+256G星空黑",3585,4699,""],["华为","nova16Ultra 12+512G豫晴空蓝",3725,5199,""],["华为","nova16Ultra 12+512G豫天际白",3755,5199,""],["华为","nova16Ultra 12+512G豫星空黑",3725,5199,""],["华为","nova16Ultra 12+512G星空黑",3785,5199,""],["华为","nova16Z 12+256G幻彩贝母",2145,2699,""],["华为","nova16Z 12+512G幻彩贝母",2535,3199,""],["华为","nova16Z 12+512G天际白",2515,3199,""],["华为","nova16Z 12+512G星空黑",2535,3199,""],["华为","畅享100 128G豫冰川白",1205,1399,""],["华为","畅享100 128G豫丹霞橙",1205,1399,""],["华为","畅享100 128G豫幻夜黑",1205,1399,""],["华为","畅享100 256G河南的冰川白",1605,1699,""],["华为","畅享100 256G河南的丹霞橙",1605,1699,""],["华为","畅享100 256G河南的幻夜黑",1605,1699,""],["华为","畅享100Pro 256G豫丹霞橙",2055,2199,""],["华为","畅享100Pro 256G豫幻夜黑",2055,2199,""],["华为","畅享100Pro 256G豫羽纱紫",2055,2199,""],["华为","畅享100Pro 256G豫羽砂白",2055,2199,""],["华为","畅享100Pro 512G豫丹霞橙",2605,2699,""],["华为","畅享100Pro 512G豫幻夜黑",2650,2699,""],["华为","畅享100Pro 512G豫羽纱紫",2605,2699,""],["华为","畅享100Pro 512G豫羽砂白",2605,2699,""],["华为","畅享100ProMax 256G豫流沙金",2205,2399,""],["华为","畅享100ProMax 256G豫蔚海蓝",2205,2399,""],["华为","畅享100ProMax 256G豫雪域白",2205,2399,""],["华为","畅享100ProMax 256G豫曜金黑",2205,2399,""],["华为","畅享100ProMax 512G豫流沙金",2700,2899,""],["华为","畅享100ProMax 512G豫蔚海蓝",2700,2899,""],["华为","畅享100ProMax 512G豫雪域白",2550,2899,""],["华为","畅享100ProMax 512G豫曜金黑",2550,2899,""],["华为","畅享70S 8+256雪域白",1175,1399,""],["华为","畅享70S 8+256曜金黑",1175,1399,""],["华为","畅享70X 8+256湖光青",1485,1999,""],["华为","畅享70X 8+256活力版冰晶蓝",1325,0,""],["华为","畅享70X 8+256活力版雪域白",1445,0,""],["华为","畅享70X 8+256活力版曜金黑",1415,0,""],["华为","畅享70X 8+256雪域白",1435,1999,""],["华为","畅享70X 8+256曜金黑",1485,1999,""],["华为","畅享70X 8+256尊享版流沙金",1445,1899,""],["华为","畅享70X 8+256尊享版星海蓝",1445,1899,""],["华为","畅享70X 8+256尊享版曜金黑",1455,1899,""],["华为","畅享70X 8+512湖光青",1755,2299,""],["华为","畅享70X 8+512活力版冰晶蓝",1645,0,""],["华为","畅享70X 8+512曜金黑",1685,2299,""],["华为","畅享70X 8+512云杉黛",1695,2299,""],["华为","畅享70X 8+512尊享版流沙金",1735,2199,""],["华为","畅享70X 8+512尊享版星海蓝",1755,2199,""],["华为","畅享70X 8+512尊享版曜金黑",1755,2199,""],["华为","畅享80 8+128天际白",1155,1199,""],["华为","畅享80 8+128天青蓝",1145,1199,""],["华为","畅享80 8+128曜金黑",1165,1199,""],["华为","畅享80 8+256天际白",1255,1399,""],["华为","畅享80 8+256天青蓝",1245,1399,""],["华为","畅享80 8+512原野绿",1435,1699,""],["华为","畅享90 256星海蓝",1465,1599,""],["华为","畅享90 256星空黑",1435,1599,""],["华为","畅享90mPlus 128星空黑",1185,0,""],["华为","畅享90mPlus 128羽沙白",1185,0,""],["华为","畅享90mPlus 256星空黑",1495,0,""],["华为","畅享90mPlus 256羽沙白",1495,0,""],["华为","畅享90Plus 128豫星海蓝",1235,1499,""],["华为","畅享90Plus 128豫星空黑",1245,1499,""],["华为","畅享90Plus 128豫羽沙白",1245,1499,""],["华为","畅享90Plus 128星海蓝",1265,1499,""],["华为","畅享90Plus 128星空黑",1275,1499,""],["华为","畅享90Plus 128羽沙白",1275,1499,""],["华为","畅享90Plus 256豫星海蓝",1495,1799,""],["华为","畅享90Plus 256豫星空黑",1475,1799,""],["华为","畅享90Plus 256豫羽沙白",1505,1799,""],["华为","畅享90Plus 256星海蓝",1565,1799,""],["华为","畅享90Plus 256星空黑",1555,1799,""],["华为","畅享90Plus 256羽沙白",1565,1799,""],["华为","畅享90ProMax 128晨曦金",1685,1699,""],["华为","畅享90ProMax 128飞天青",1695,1699,""],["华为","畅享90ProMax 128雪域白",1705,0,""],["华为","畅享90ProMax 128曜金黑",1685,1699,""],["华为","畅享90ProMax 256晨曦金",1885,1999,""],["华为","畅享90ProMax 256飞天青",1835,1999,""],["华为","畅享90ProMax 256豫晨曦金",1805,1999,""],["华为","畅享90ProMax 256豫飞天青",1785,1999,""],["华为","畅享90ProMax 256豫雪域白",1785,1999,""],["华为","畅享90ProMax 256豫曜金黑",1805,1999,""],["华为","畅享90ProMax 256雪域白",1855,1999,""],["华为","畅享90ProMax 256曜金黑",1855,1999,""],["华为","畅享90ProMax 512晨曦金",2275,2399,""],["华为","畅享90ProMax 512飞天青",2215,2399,""],["华为","畅享90ProMax 512豫晨曦金",2205,2399,""],["华为","畅享90ProMax 512豫飞天青",2155,2399,""],["华为","畅享90ProMax 512豫雪域白",2155,2399,""],["华为","畅享90ProMax 512豫曜金黑",2165,2399,""],["华为","畅享90ProMax 512雪域白",2205,2399,""],["华为","畅享90ProMax 512曜金黑",2275,2399,""],["华为","华为Mate X6 12+256寰宇红",7850,12999,""],["华为","华为Mate X6 12+256星云白",7600,12999,""],["华为","华为Mate X6 12+256星云灰",7680,12999,""],["华为","华为Mate X6 12+256曜石黑",7820,12999,""],["华为","华为Mate X6 12+512豫寰宇红",8450,13999,""],["华为","华为Mate X6 12+512豫星云白",8450,13999,""],["华为","华为Mate X6 12+512豫星云灰",8300,13999,""],["华为","华为Mate X6 12+512豫曜石黑",8500,13999,""],["华为","华为Mate X6 12+512寰宇红",8650,13999,""],["华为","华为Mate X6 12+512星云白",8600,13999,""],["华为","华为Mate X6 12+512曜石黑",8600,13999,""],["华为","华为Mate X6典藏版 16+1T寰宇红",11350,15999,""],["华为","华为Mate X6典藏版 16+1T深海蓝",9800,15999,""],["华为","华为Mate X6典藏版 16+1T星云白",11100,15999,""],["华为","华为Mate X6典藏版 16+512寰宇红",10250,14999,""],["华为","华为Mate X6典藏版 16+512深海蓝",10050,14999,""],["华为","华为Mate X6典藏版 16+512星云白",10150,14999,""],["华为","华为Mate X6典藏版 16+512曜石黑",9800,14999,""],["华为","华为Mate X7 12+256豫幻影紫",10450,12999,""],["华为","华为Mate X7 12+256寰宇红",10600,12999,""],["华为","华为Mate X7 12+256幻影紫",10550,12999,""],["华为","华为Mate X7 12+256曜石黑",10600,12999,""],["华为","华为Mate X7 12+256云锦白",10500,12999,""],["华为","华为Mate X7 12+256云锦蓝",10400,12999,""],["华为","华为Mate X7 12+512豫寰宇红",11300,13999,""],["华为","华为Mate X7 12+512豫幻影紫",11200,13999,""],["华为","华为Mate X7 12+512豫曜石黑",11450,13999,""],["华为","华为Mate X7 12+512豫云锦白",11250,13999,""],["华为","华为Mate X7 12+512豫云锦蓝",11100,13999,""],["华为","华为Mate X7 12+512寰宇红",11600,13999,""],["华为","华为Mate X7 12+512幻影紫",11500,13999,""],["华为","华为Mate X7 12+512曜石黑",11750,13999,""],["华为","华为Mate X7 12+512云锦白",11450,13999,""],["华为","华为Mate X7 12+512云锦蓝",11350,13999,""],["华为","华为Mate X7典藏版 16+1T豫云锦白",13300,15999,""],["华为","华为Mate X7典藏版 16+1T豫云锦蓝",13250,15999,""],["华为","华为Mate X7典藏版 16+1T寰宇红",13750,15999,""],["华为","华为Mate X7典藏版 16+1T幻影紫",13750,15999,""],["华为","华为Mate X7典藏版 16+1T曜石黑",14450,15999,""],["华为","华为Mate X7典藏版 16+1T云锦白",13450,15999,""],["华为","华为Mate X7典藏版 16+512豫寰宇红",12100,14999,""],["华为","华为Mate X7典藏版 16+512豫幻影紫",12300,14999,""],["华为","华为Mate X7典藏版 16+512豫曜石黑",12450,14999,""],["华为","华为Mate X7典藏版 16+512豫云锦白",12150,14999,""],["华为","华为Mate X7典藏版 16+512寰宇红",12450,14999,""],["华为","华为Mate X7典藏版 16+512幻影紫",12450,14999,""],["华为","华为Mate X7典藏版 16+512曜石黑",12700,14999,""],["华为","华为Mate X7典藏版 16+512云锦白",12350,14999,""],["华为","华为Pocket2优享版12+512大溪地灰",3785,5999,""],["华为","华为Pocket2优享版12+512蓝梦",3850,5999,""],["华为","华为Pocket2优享版12+512雅黑",3900,5999,""],["华为","华为Pocket2优享版12+512芋紫",3850,5999,""],["华为","华为Pura 70Pro 12+1T雪域白",4000,7999,""],["华为","华为Pura 70Pro 12+1T羽砂黑",3900,7999,""],["华为","华为Pura 70Pro 12+512雪域白",3800,6999,""],["华为","华为Pura 70Pro 12+512羽砂黑",3850,6999,""],["华为","华为Pura 70Ultra 12+512摩卡棕",3800,9999,""],["华为","华为Pura 70Ultra 12+512星芒白",3780,9999,""],["华为","华为Pura 70Ultra 12+512星芒黑",3750,9999,""],["华为","华为Pura 70Ultra 12+512玄黑",3830,9999,""],["华为","华为Pura 70Ultra 16+512摩卡棕",4150,9999,""],["华为","华为Pura 70Ultra 16+512香颂绿",4250,9999,""],["华为","华为Pura 70Ultra 16+512星芒黑",4050,9999,""],["华为","华为Pura 80 12+256丝绒白",3550,4699,""],["华为","华为Pura 80 12+256丝绒黑",3550,4699,""],["华为","华为Pura 80 12+256丝绒金",3500,4699,""],["华为","华为Pura 80 12+256丝绒绿",3520,4699,""],["华为","华为Pura 80 12+512丝绒白",3700,5199,""],["华为","华为Pura 80 12+512丝绒黑",3650,5199,""],["华为","华为Pura 80 12+512丝绒金",3750,5199,""],["华为","华为Pura 80 12+512丝绒绿",3600,5199,""],["华为","华为Pura 80Pro 12+1T釉白",4580,7999,""],["华为","华为Pura 80Pro 12+1T釉黑",4500,7999,""],["华为","华为Pura 80Pro 12+1T釉金",4550,7999,""],["华为","华为Pura 80Pro 12+512釉白",4200,6999,""],["华为","华为Pura 80Pro 12+512釉黑",4050,6999,""],["华为","华为Pura 80Pro 12+512釉金",4000,6999,""],["华为","华为Pura 80Pro+ 16+1T釉白",5800,8999,""],["华为","华为Pura 80Pro+ 16+1T釉黑",5600,8999,""],["华为","华为Pura 80Pro+ 16+1T釉红",5730,8999,""],["华为","华为Pura 80Pro+ 16+1T釉青",5600,8999,""],["华为","华为Pura 80Pro+ 16+512釉白",4420,7999,""],["华为","华为Pura 80Pro+ 16+512釉黑",4350,7999,""],["华为","华为Pura 80Pro+ 16+512釉青",4450,7999,""],["华为","华为Pura 80Ultra 16+1T鎏光黑",5950,10999,""],["华为","华为Pura 80Ultra 16+1T鎏光金",6300,10999,""],["华为","华为Pura 80Ultra 16+512鎏光黑",4700,9999,""],["华为","华为Pura 80Ultra 16+512鎏光金",4700,9999,""],["华为","华为Pura 90 12+256豫丝绒黑",3600,4699,""],["华为","华为Pura 90 12+256丝绒黑",3650,4699,""],["华为","华为Pura 90 12+512豫罗兰紫",4050,5199,""],["华为","华为Pura 90 12+512豫丝绒黑",4000,5199,""],["华为","华为Pura 90 12+512豫雪域白",4100,5199,""],["华为","华为Pura 90 12+512罗兰紫",4250,5199,""],["华为","华为Pura 90 12+512丝绒黑",4100,5199,""],["华为","华为Pura 90 12+512雪域白",4150,5199,""],["华为","华为Pura 90Pro 12+256粉红芭乐",4300,5499,""],["华为","华为Pura 90Pro 12+256豫橘子汽水",4300,5499,""],["华为","华为Pura 90Pro 12+256橘子汽水",4400,5499,""],["华为","华为Pura 90Pro 12+256桑果黑",4150,5499,""],["华为","华为Pura 90Pro 12+256椰青白",4480,5499,""],["华为","华为Pura 90Pro 12+512粉红芭乐",4800,5999,""],["华为","华为Pura 90Pro 12+512豫粉红芭乐",4550,5999,""],["华为","华为Pura 90Pro 12+512豫橘子汽水",4550,5999,""],["华为","华为Pura 90Pro 12+512橘子汽水",4850,5999,""],["华为","华为Pura 90Pro 12+512桑果黑",4850,5999,""],["华为","华为Pura 90Pro 12+512椰青白",4800,5999,""],["华为","华为Pura 90Pro 16+512粉红芭乐",5500,6499,""],["华为","华为Pura 90Pro 16+512豫粉红芭乐",5400,6499,""],["华为","华为Pura 90Pro 16+512豫橘子汽水",4950,6499,""],["华为","华为Pura 90Pro 16+512豫桑果黑",5200,6499,""],["华为","华为Pura 90Pro 16+512豫椰青白",4950,6499,""],["华为","华为Pura 90Pro 16+512橘子汽水",5450,6499,""],["华为","华为Pura 90Pro 16+512桑果黑",5300,6499,""],["华为","华为Pura 90Pro 16+512椰青白",5350,6499,""],["华为","华为Pura 90ProMax 12+256晨曦金",5400,6499,""],["华为","华为Pura 90ProMax 12+256翡翠湖",5150,6499,""],["华为","华为Pura 90ProMax 12+256橘子海",5300,6499,""],["华为","华为Pura 90ProMax 12+256霞光紫",5200,6499,""],["华为","华为Pura 90ProMax 12+256曜石黑",5400,6499,""],["华为","华为Pura 90ProMax 12+512晨曦金",5650,6999,""],["华为","华为Pura 90ProMax 12+512翡翠湖",5700,6999,""],["华为","华为Pura 90ProMax 12+512豫晨曦金",5500,6999,""],["华为","华为Pura 90ProMax 12+512豫翡翠湖",5600,6999,""],["华为","华为Pura 90ProMax 12+512豫霞光紫",5850,6999,""],["华为","华为Pura 90ProMax 12+512橘子海",5450,6999,""],["华为","华为Pura 90ProMax 12+512霞光紫",5950,6999,""],["华为","华为Pura 90ProMax 12+512曜石黑",5450,6999,""],["华为","华为Pura 90ProMax 16+1T豫晨曦金",7250,8499,""],["华为","华为Pura 90ProMax 16+1T豫翡翠湖",7100,8499,""],["华为","华为Pura 90ProMax 16+1T豫橘子海",7150,8499,""],["华为","华为Pura 90ProMax 16+1T豫霞光紫",7150,8499,""],["华为","华为Pura 90ProMax 16+1T豫曜石黑",7450,8499,""],["华为","华为Pura 90ProMax 16+512晨曦金",6300,7499,""],["华为","华为Pura 90ProMax 16+512翡翠湖",6150,7499,""],["华为","华为Pura 90ProMax 16+512豫晨曦金",5800,7499,""],["华为","华为Pura 90ProMax 16+512豫橘子海",5900,7499,""],["华为","华为Pura 90ProMax 16+512豫霞光紫",5900,7499,""],["华为","华为Pura 90ProMax 16+512橘子海",6150,7499,""],["华为","华为Pura 90ProMax 16+512霞光紫",6150,7499,""],["华为","华为Pura 90ProMax 16+512曜石黑",6250,7499,""],["华为","华为Pura X 12+256零度白",5750,7499,""],["华为","华为Pura X 12+256月影灰",5900,7499,""],["华为","华为Pura X 12+512零度白",6150,7999,""],["华为","华为Pura X 12+512月影灰",6100,7999,""],["华为","华为Pura X Max12+256豫幻夜黑",9950,10999,""],["华为","华为Pura X Max12+256豫星际蓝",9700,10999,""],["华为","华为Pura X Max12+512橄榄金",10800,11999,""],["华为","华为Pura X Max12+512豫橄榄金",10350,11999,""],["华为","华为Pura X Max12+512豫幻夜黑",10250,11999,""],["华为","华为Pura X Max12+512豫活力橙",10200,11999,""],["华为","华为Pura X Max12+512豫零度白",10500,11999,""],["华为","华为Pura X Max12+512豫星际蓝",10150,11999,""],["华为","华为Pura X Max12+512幻夜黑",10600,11999,""],["华为","华为Pura X Max12+512活力橙",10700,11999,""],["华为","华为Pura X Max12+512零度白",10800,11999,""],["华为","华为Pura X Max12+512星际蓝",10550,11999,""],["华为","华为Pura X Max典藏版16+1T豫橄榄金",12500,13999,""],["华为","华为Pura X Max典藏版16+1T豫幻夜黑",12650,13999,""],["华为","华为Pura X Max典藏版16+1T豫活力橙",12700,13999,""],["华为","华为Pura X Max典藏版16+1T豫零度白",12700,13999,""],["华为","华为Pura X Max典藏版16+1T豫星际蓝",12550,13999,""],["华为","华为Pura X Max典藏版16+1T幻夜黑",12850,13999,""],["华为","华为Pura X Max典藏版16+1T零度白",12900,13999,""],["华为","华为Pura X Max典藏版16+512橄榄金",11750,12999,""],["华为","华为Pura X Max典藏版16+512豫橄榄金",11450,12999,""],["华为","华为Pura X Max典藏版16+512豫幻夜黑",11450,12999,""],["华为","华为Pura X Max典藏版16+512豫活力橙",11400,12999,""],["华为","华为Pura X Max典藏版16+512豫零度白",11400,12999,""],["华为","华为Pura X Max典藏版16+512豫星际蓝",11300,12999,""],["华为","华为Pura X Max典藏版16+512幻夜黑",11700,12999,""],["华为","华为Pura X Max典藏版16+512活力橙",11700,12999,""],["华为","华为Pura X Max典藏版16+512零度白",11700,12999,""],["华为","华为Pura X Max典藏版16+512星际蓝",11400,12999,""],["华为","华为Pura X View12+1T豫幻夜黑",8150,8499,""],["华为","华为Pura X View12+1T豫零度白",8100,8499,""],["华为","华为Pura X View12+1T豫亚麻灰",8150,8499,""],["华为","华为Pura X View12+1T豫跃影红",7850,8499,""],["华为","华为Pura X View12+1T幻夜黑",8250,8499,""],["华为","华为Pura X View12+1T零度白",8250,8499,""],["华为","华为Pura X View12+1T跃影红",8200,8499,""],["华为","华为Pura X View12+256幻夜黑",6150,0,""],["华为","华为Pura X View12+256零度白",6200,0,""],["华为","华为Pura X View12+256亚麻灰",6000,0,""],["华为","华为Pura X View12+256跃影红",6100,0,""],["华为","华为Pura X View12+512豫零度白",6850,6999,""],["华为","华为Pura X View12+512豫亚麻灰",6850,6999,""],["华为","华为Pura X View12+512豫跃影红",6650,6999,""],["华为","华为Pura X View12+512幻夜黑",7000,0,""],["华为","华为Pura X View12+512零度白",6950,6999,""],["华为","华为Pura X View12+512亚麻灰",6950,6999,""],["华为","华为Pura X View12+512跃影红",6800,6999,""],["华为","华为Pura X典藏版16+1T型格红",7800,9999,""],["华为","华为Pura X典藏版16+1T型格绿",7500,9999,""],["华为","华为Pura X典藏版16+512型格红",6350,8999,""],["华为","华为Pura X典藏版16+512型格绿",6400,8999,""],["华为","华为Pura X典藏版16+512月影灰",6850,8999,""],["华为","麦芒40 12+256冰川白",1405,2199,""],["华为","麦芒40 12+256幻夜黑",1415,2199,""],["华为","麦芒40 12+256原野绿",1415,2199,""],["华为","麦芒40 12+512冰川白",1655,2499,""],["华为","麦芒40 12+512幻夜黑",1655,2499,""],["华为","麦芒40 8+256冰川白",1315,1999,""],["华为","麦芒40 8+256幻夜黑",1325,1999,""],["华为","麦芒40 8+256原野绿",1325,1999,""],["融合系列","HUAWEl FreeArc 有线充 苍穹灰",375,0,""],["融合系列","HUAWEl FreeArc 有线充 星空黑",395,0,""],["融合系列","HUAWEl FreeArc 有线充 原野绿",370,0,""],["融合系列","HUAWEl FreeArc 有线充豫苍穹灰",370,0,""],["融合系列","HUAWEl FreeArc 有线充豫暖云白",390,0,""],["融合系列","HUAWEl FreeArc 有线充豫星空黑",470,0,""],["融合系列","HUAWEl FreeArc 有线充豫原野绿",360,0,""],["融合系列","HUAWEl FreeArc 有线充足球暖云白",405,0,""],["融合系列","华为12000自带线100W全能充移动电源P0020白色",260,0,""],["融合系列","华为M-Pencil Pro 2025款(CD56)雪域白",465,0,""],["融合系列","华为Sound Joy2智能音响-智能版海岛蓝",500,0,""],["融合系列","华为Sound Joy2智能音响-智能版向新绿",550,0,""],["融合系列","华为Sound Joy2智能音响-智能版曜石黑",550,0,""],["融合系列","华为Sound X5 玄黑",1500,0,""],["融合系列","华为Sound X5鎏金",1720,0,""],["融合系列","华为冰糖全能充电器Max 100W有串",145,0,""],["融合系列","华为家庭存储8TB+8TB灰",4600,0,""],["融合系列","华为手环10NFC版-B39冰川白",190,0,""],["融合系列","华为手环10NFC版-B39羽砂黑",185,0,""],["融合系列","华为手环10标准合金版-B29----J冰川白",170,0,""],["融合系列","华为手环10标准合金版-B29----J羽砂黑",162,0,""],["融合系列","华为手环10标准纤维版-B19----J曜石黑",155,0,""],["融合系列","华为手环B7 运动版曜金黑",760,0,""],["融合系列","华为无线耳机Free Buds 5i陶瓷白",240,0,""],["融合系列","华为无线耳机Free Buds 6i幻夜黑",282,0,""],["融合系列","华为无线耳机Free Buds 6i流光紫",255,0,""],["融合系列","华为无线耳机Free Buds 6i天际白",340,0,""],["融合系列","华为无线耳机Free Buds 7i贝母白",350,0,""],["融合系列","华为无线耳机Free Buds 7i深空灰",350,0,""],["融合系列","华为无线耳机Free Buds 7i樱桃粉",355,0,""],["融合系列","华为无线耳机Free Buds Neo零度白",669,0,""],["融合系列","华为无线耳机Free Buds Neo星河银",669,0,""],["融合系列","华为无线耳机Free Buds Neo星空黑",669,0,""],["融合系列","华为无线耳机Free Buds Neo星云粉",669,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式丹宁蓝",1050,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫典藏版珠光银",1230,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫冰莓紫",1020,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫丹宁蓝",1020,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫玫瑰金",1020,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫摩登黑",1020,0,""],["融合系列","华为无线耳机FreeClip2 耳夹式豫羽砂白",1040,0,""],["融合系列","华为无线耳机FreeLace活力版薄荷蓝",150,0,""],["融合系列","华为无线耳机FreeLace活力版曜石黑",150,0,""],["融合系列","华为无线耳机FreeLace活力版云杉绿",150,0,""],["融合系列","华为无线蓝牙鼠标CD20R白色",48,0,""],["融合系列","华为无线蓝牙鼠标CD26SE白色",50,0,""],["融合系列","华为无线蓝牙鼠标CD26SE黑色",50,0,""],["融合系列","华为无线蓝牙鼠标CD26SE灰色",50,0,""],["融合系列","华为无线蓝牙鼠标二代CD26-R白色",88,0,""],["融合系列","华为无线蓝牙鼠标二代CD26-R晴蓝",95,0,""],["融合系列","华为自带线全能充智能移动电源(100W 12000)(P0023) 摩登黑",350,0,""],["融合系列","华为自带线全能充智能移动电源(100W 12000)(P0023)冰晶粉",350,0,""],["融合系列","学而思华为擎云C5e 8+128 激活星云灰 定制演示样机",1100,0,""],["荣耀","畅玩60 8+256墨岩黑",1285,1399,""],["荣耀","畅玩60 8+256晓山青",1285,1399,""],["荣耀","畅玩60 8+256玉龙雪",1290,1399,""],["荣耀","畅玩60A 4+128碧空蓝",840,0,""],["荣耀","畅玩60A 4+128海湖青",840,0,""],["荣耀","畅玩60A 4+128墨岩黑",840,0,""],["荣耀","畅玩60A 6+128碧空蓝",930,0,""],["荣耀","畅玩60A 6+128海湖青",925,0,""],["荣耀","畅玩60A 6+128墨岩黑",925,0,""],["荣耀","畅玩70C 4G 4+128海湖青",825,0,""],["荣耀","畅玩70C 4G 4+128揽月银",825,0,""],["荣耀","畅玩70C 4G 4+128墨岩黑",830,0,""],["荣耀","畅玩70C 4G 4+64海湖青",710,0,""],["荣耀","畅玩70C 4G 4+64揽月银",710,0,""],["荣耀","畅玩70C 4G 4+64墨岩黑",710,0,""],["荣耀","畅玩70C 4G 6+128海湖青",935,0,""],["荣耀","畅玩70C 4G 6+128揽月银",935,0,""],["荣耀","畅玩70plus 12+256幻夜黑",1515,0,""],["荣耀","畅玩70plus 12+256流沙粉",1510,0,""],["荣耀","畅玩70plus 12+256晓山青",1510,0,""],["荣耀","畅玩70plus 12+256玉龙雪",1510,0,""],["荣耀","畅玩70plus 12+512幻夜黑",1740,0,""],["荣耀","畅玩70plus 12+512流沙粉",1735,0,""],["荣耀","畅玩70plus 12+512晓山青",1770,0,""],["荣耀","畅玩70plus 12+512玉龙雪",1740,0,""],["荣耀","畅玩80 4+128碧空蓝",850,1049,""],["荣耀","畅玩80 4+128海湖青",845,1049,""],["荣耀","畅玩80 4+128墨岩黑",845,1049,""],["荣耀","畅玩80 6+128碧空蓝",955,1099,""],["荣耀","畅玩80 6+128海湖青",955,1099,""],["荣耀","畅玩80 6+128墨岩黑",955,1099,""],["荣耀","畅玩80 6+256墨岩黑",1195,0,""],["荣耀","畅玩80 Pro 12+256幻夜黑",1635,2299,""],["荣耀","畅玩80 Pro 12+256天海青",1595,2299,""],["荣耀","畅玩80 Pro 6+256幻夜黑",1280,1899,""],["荣耀","畅玩80 Pro 6+256天海青",1305,1899,""],["荣耀","畅玩80 Pro 8+256幻夜黑",1390,2099,""],["荣耀","畅玩80 Pro 8+256天海青",1390,2099,""],["荣耀","畅玩80 Pro 8+256月影白",1390,2099,""],["荣耀","畅玩80plus 6+256浮光金",1235,0,""],["荣耀","畅玩80plus 6+256墨岩黑",1230,0,""],["荣耀","畅玩80plus 6+256水悠蓝",1240,0,""],["荣耀","畅玩80plus 8+128浮光金",1135,0,""],["荣耀","畅玩80plus 8+128墨岩黑",1125,0,""],["荣耀","畅玩80plus 8+128水悠蓝",1135,0,""],["荣耀","畅玩80plus 8+256浮光金",1405,0,""],["荣耀","畅玩80plus 8+256墨岩黑",1365,0,""],["荣耀","畅玩80plus 8+256水悠蓝",1395,0,""],["荣耀","荣耀500 12+256海蓝宝",2625,2699,""],["荣耀","荣耀500 12+256星光粉",2695,2699,""],["荣耀","荣耀500 12+256曜石黑",2565,2699,""],["荣耀","荣耀500 12+256月光银",2645,2699,""],["荣耀","荣耀500 12+512海蓝宝",2885,2999,""],["荣耀","荣耀500 12+512星光粉",2965,2999,""],["荣耀","荣耀500 12+512曜石黑",2925,2999,""],["荣耀","荣耀500 12+512月光银",2905,2999,""],["荣耀","荣耀500Pro 16+1T海蓝宝",4250,4799,""],["荣耀","荣耀600Pro 12+512豫光羽蓝",3625,4299,""],["荣耀","荣耀600Pro 12+512豫青苹果",3625,4299,""],["荣耀","荣耀600Pro 12+512豫幸运星",3485,4299,""],["荣耀","荣耀600Pro 12+512豫曜石黑",3545,4299,""],["荣耀","荣耀600Pro 16+512豫光羽蓝",3745,4699,""],["荣耀","荣耀600Pro 16+512豫青苹果",3715,4699,""],["荣耀","荣耀600Pro 16+512豫幸运星",3855,4699,""],["荣耀","荣耀600Pro 16+512豫曜石黑",3815,4699,""],["荣耀","荣耀600超级版 12+256豫光羽蓝",2605,3299,""],["荣耀","荣耀600超级版 12+256豫青苹果",2635,3299,""],["荣耀","荣耀600超级版 12+256幸运星",2575,3299,""],["荣耀","荣耀600超级版 12+256曜石黑",2525,3299,""],["荣耀","荣耀600超级版 12+512豫光羽蓝",2845,3699,""],["荣耀","荣耀600超级版 12+512豫青苹果",2865,3699,""],["荣耀","荣耀600超级版 12+512豫曜石黑",2845,3699,""],["荣耀","荣耀600超级版 12+512幸运星",2955,3699,""],["荣耀","荣耀600元气版 12+256豫好事橙",2415,2999,""],["荣耀","荣耀600元气版 12+256豫元气白",2555,2999,""],["荣耀","荣耀600元气版 12+512好事橙",2755,3399,""],["荣耀","荣耀600元气版 12+512豫曜石黑",2715,3399,""],["荣耀","荣耀600元气版 12+512豫元气白",2745,3399,""],["荣耀","荣耀Magic V Flip2 12+512晨曦紫",5085,0,""],["荣耀","荣耀Magic V Flip2 12+512钛空灰",5005,0,""],["荣耀","荣耀Magic V5 折叠屏16+1T暖白色",8050,10999,""],["荣耀","荣耀Magic V5 折叠屏16+1T绒黑色",7750,10999,""],["荣耀","荣耀Magic V5 折叠屏16+1T曙光金",7700,10999,""],["荣耀","荣耀Magic V5 折叠屏16+1T丝路敦煌",8050,10999,""],["荣耀","荣耀Magic V5 折叠屏16+512暖白色",7650,9999,""],["荣耀","荣耀Magic V5 折叠屏16+512绒黑色",7550,9999,""],["荣耀","荣耀Magic V5 折叠屏16+512曙光金",7450,9999,""],["荣耀","荣耀Magic V6 折叠屏12+512赤兔红",8950,9999,""],["荣耀","荣耀Magic V6 折叠屏12+512豫绒黑色",9050,9999,""],["荣耀","荣耀Magic V6 折叠屏12+512旭日金",8850,9999,""],["荣耀","荣耀Magic V6 折叠屏16+512赤兔红",9800,10999,""],["荣耀","荣耀Magic V6 折叠屏16+512绒黑色",9800,10999,""],["荣耀","荣耀Magic V6 折叠屏16+512雪域白",9750,10999,""],["荣耀","荣耀Magic8 12+512豫绒黑色",4235,4799,""],["荣耀","荣耀Magic8 12+512豫天青色",4105,4799,""],["荣耀","荣耀Magic8 12+512豫旭日金",4185,4799,""],["荣耀","荣耀Magic8 12+512豫雪域白",4235,4799,""],["荣耀","荣耀Magic8 16+1T豫天青色",5045,5499,""],["荣耀","荣耀Magic8 16+1T豫旭日金",5205,5499,""],["荣耀","荣耀Magic8 16+1T绒黑色",5100,5499,""],["荣耀","荣耀Magic8 16+512豫绒黑色",4505,4999,""],["荣耀","荣耀Magic8 16+512豫天青色",4425,4999,""],["荣耀","荣耀Magic8 16+512豫旭日金",4425,4999,""],["荣耀","荣耀Magic8Pro 16+1T豫绒黑色",5835,6699,""],["荣耀","荣耀Magic8Pro 16+1T豫天青色",5855,6699,""],["荣耀","荣耀Magic8Pro 16+1T豫雪域白",5975,6699,""],["荣耀","荣耀Magic8Pro 16+512绒黑色",5050,6199,""],["荣耀","荣耀Magic8Pro 16+512天青色",5050,6199,""],["荣耀","荣耀Magic8Pro 16+512旭日金沙",5050,6199,""],["荣耀","荣耀Magic8Pro 16+512雪域白",5200,6199,""],["荣耀","荣耀Magic8ProAir 12+512轻橙",3725,5299,""],["荣耀","荣耀Magic8ProAir 12+512仙紫",3635,5299,""],["荣耀","荣耀Magic8ProAir 12+512影黑",3605,5299,""],["荣耀","荣耀Magic8ProAir 12+512羽白",3525,5299,""],["荣耀","荣耀Magic8ProAir 16+512轻橙",3935,5599,""],["荣耀","荣耀Magic8ProAir 16+512仙紫",3935,5599,""],["荣耀","荣耀Magic8ProAir 16+512影黑",3995,5599,""],["荣耀","荣耀Magic8ProAir 16+512羽白",4005,5599,""],["荣耀","荣耀Magic8RSR 16+512板岩灰",6200,0,""],["荣耀","荣耀Magic8RSR 16+512月光石",6300,0,""],["荣耀","荣耀Magic8RSR 24+1T板岩灰",7850,0,""],["荣耀","荣耀Magic9 12+512豫爆米黄",4900,5499,""],["荣耀","荣耀Magic9 12+512豫橄榄青",5250,5499,""],["荣耀","荣耀Magic9 12+512豫开场白",4850,5499,""],["荣耀","荣耀Magic9 12+512豫幕布黑",5250,5499,""],["荣耀","荣耀Magic9 16+1T豫开场白",6850,6999,""],["荣耀","荣耀Magic9 16+1T豫幕布黑",6850,6999,""],["荣耀","荣耀Magic9 16+512豫爆米黄",5100,5999,""],["荣耀","荣耀Magic9 16+512豫橄榄青",5350,5999,""],["荣耀","荣耀Magic9 16+512豫开场白",5250,5999,""],["荣耀","荣耀Magic9 16+512豫幕布黑",5200,5999,""],["荣耀","荣耀Magic9Pro Max 16+1T豫苔青",8150,0,""],["荣耀","荣耀Magic9Pro Max 16+1T豫银盐",7800,0,""],["荣耀","荣耀Magic9Pro Max 16+1T豫影黑",7850,0,""],["荣耀","荣耀Magic9Pro Max 16+512豫苔青",6900,6999,""],["荣耀","荣耀Magic9Pro Max 16+512豫银盐",6850,6999,""],["荣耀","荣耀Magic9Pro Max 16+512豫影黑",6850,6999,""],["荣耀","荣耀Magic9超能版 12+256橄榄青",3850,4499,""],["荣耀","荣耀Magic9超能版 12+512豫爆米黄",4600,4999,""],["荣耀","荣耀Magic9超能版 12+512豫橄榄青",4650,4999,""],["荣耀","荣耀Magic9超能版 12+512豫开场白",4500,4999,""],["荣耀","荣耀Magic9超能版 12+512豫幕布黑",4600,4999,""],["荣耀","荣耀Magic9超能版 16+512豫橄榄青",4950,5499,""],["荣耀","荣耀Magic9超能版 16+512豫开场白",4850,5499,""],["荣耀","荣耀Magic9超能版 16+512豫幕布黑",5000,5499,""],["荣耀","荣耀play10A 4+128碧空蓝",855,0,""],["荣耀","荣耀play10A 4+128海湖青",855,0,""],["荣耀","荣耀play10A 4+128墨岩黑",855,0,""],["荣耀","荣耀play10A 6+128碧空蓝",940,0,""],["荣耀","荣耀play10A 6+128海湖青",940,0,""],["荣耀","荣耀play10A 6+128墨岩黑",940,0,""],["荣耀","荣耀play10C 12+256晨雾白",1385,0,""],["荣耀","荣耀play10C 12+256幻夜黑",1375,0,""],["荣耀","荣耀play10C 12+256天海青",1375,0,""],["荣耀","荣耀play10C 4+128晨雾白",900,0,""],["荣耀","荣耀play10C 4+128幻夜黑",900,0,""],["荣耀","荣耀play10C 4+128天海青",900,0,""],["荣耀","荣耀play10C 6+128幻夜黑",1000,0,""],["荣耀","荣耀play10C 6+128天海青",1000,0,""],["荣耀","荣耀play10C 8+256晨雾白",1355,0,""],["荣耀","荣耀play10C 8+256幻夜黑",1310,0,""],["荣耀","荣耀play10C 8+256天海青",1345,0,""],["荣耀","荣耀play10T 12+256幻夜黑",1595,0,""],["荣耀","荣耀play10T 12+256天海青",1595,0,""],["荣耀","荣耀play10T 12+256月影白",1575,0,""],["荣耀","荣耀play10T 8+128幻夜黑",1205,0,""],["荣耀","荣耀play10T 8+128天海青",1200,0,""],["荣耀","荣耀play10T 8+128月影白",1200,0,""],["荣耀","荣耀play10T 8+256幻夜黑",1405,0,""],["荣耀","荣耀play10T 8+256天海青",1405,0,""],["荣耀","荣耀play10T 8+256月影白",1445,0,""],["荣耀","荣耀Power 12+256幻夜黑",1995,0,""],["荣耀","荣耀Power 12+256雪原白",2015,0,""],["荣耀","荣耀Power2 12+256豫幻夜黑",2575,2699,""],["荣耀","荣耀Power2 12+256幻夜黑",2635,2699,""],["荣耀","荣耀Power2 12+256旭日橙",2625,2699,""],["荣耀","荣耀Power2 12+256雪原白",2645,2699,""],["荣耀","荣耀Power2 12+512幻夜黑",2945,2999,""],["荣耀","荣耀Power2 12+512旭日橙",3005,0,""],["荣耀","荣耀Power2 12+512雪原白",3005,0,""],["荣耀","荣耀Robot Phone12+512星轨银",8750,0,""],["荣耀","荣耀Robot Phone12+512月影灰",8950,0,""],["荣耀","荣耀WIN 12+256不怕蓝",3475,0,""],["荣耀","荣耀WIN 12+256指定赢",3425,0,""],["荣耀","荣耀WIN 12+512不怕蓝",3635,0,""],["荣耀","荣耀WIN 12+512快开黑",3805,0,""],["荣耀","荣耀WIN 12+512指定赢",3625,0,""],["荣耀","荣耀WIN 16+512不怕蓝",4005,0,""],["荣耀","荣耀WIN 16+512快开黑",4075,0,""],["荣耀","荣耀WIN 16+512指定赢",4005,0,""],["荣耀","荣耀X60GT 12+256幻夜黑",1785,1799,""],["荣耀","荣耀X60GT 12+256钛影蓝",1805,0,""],["荣耀","荣耀X60GT 12+256钛影银",1805,0,""],["荣耀","荣耀X70 12+256焕新版豫竹韵青",1945,0,""],["荣耀","荣耀X70 8+128幻夜黑",1475,0,""],["荣耀","荣耀X70 8+128焕新版幻夜黑",1445,0,""],["荣耀","荣耀X70 8+128焕新版旭日金",1445,0,""],["荣耀","荣耀X70 8+128焕新版月影白",1445,0,""],["荣耀","荣耀X70 8+128焕新版朱砂红",1445,0,""],["荣耀","荣耀X70 8+128焕新版竹韵青",1445,0,""],["荣耀","荣耀X70 8+128月影白",1475,0,""],["荣耀","荣耀X70 8+128朱砂红",1475,0,""],["荣耀","荣耀X70 8+128竹韵青",1475,0,""],["荣耀","荣耀X70 8+256幻夜黑",1615,0,""],["荣耀","荣耀X70 8+256焕新版豫幻夜黑",1615,0,""],["荣耀","荣耀X70 8+256焕新版豫旭日金",1615,0,""],["荣耀","荣耀X70 8+256焕新版豫月影白",1645,0,""],["荣耀","荣耀X70 8+256焕新版豫朱砂红",1615,0,""],["荣耀","荣耀X70 8+256焕新版豫竹韵青",1615,0,""],["荣耀","荣耀X70 8+256月影白",1660,0,""],["荣耀","荣耀X70 8+256朱砂红",1645,0,""],["荣耀","荣耀X70 8+256竹韵青",1645,0,""],["荣耀","荣耀X70i 12+256绒黑色",1665,1699,""],["荣耀","荣耀X70i 12+256天海青",1585,1699,""],["荣耀","荣耀X70i 12+256玉兰紫",1655,1699,""],["荣耀","荣耀X70i 12+256月影白",1665,1699,""],["荣耀","荣耀X70i 12+512绒黑色",1945,0,""],["荣耀","荣耀X70i 12+512天海青",1945,0,""],["荣耀","荣耀X70PROMAX 8+256幻夜黑",1685,1999,""],["荣耀","荣耀X70PROMAX 8+256幻影紫",1705,1999,""],["荣耀","荣耀X70PROMAX 8+256旭日金",1715,1999,""],["荣耀","荣耀X70PROMAX 8+256竹韵青",1715,1999,""],["荣耀","荣耀X70PROMAX 8+512幻影紫",2005,2399,""],["荣耀","荣耀X70PROMAX 8+512竹韵青",2005,2399,""],["荣耀","荣耀X80i 12+256豫青柠绿",2095,2499,""],["荣耀","荣耀X80i 12+256豫曜石黑",2095,2499,""],["荣耀","荣耀X80i 12+256豫月影白",2105,2499,""],["荣耀","荣耀X80i 8+256豫流沙粉",1805,2199,""],["荣耀","荣耀X80i 8+256豫曜石黑",1785,2199,""],["荣耀","荣耀X80i 8+256豫月影白",1815,2199,""],["荣耀","荣耀X80ProMax 12+512豫元气橙",2505,2799,""],["荣耀","荣耀X80ProMax 12+512豫闪电红",2545,2799,""],["荣耀","荣耀X80ProMax 12+512豫玄甲黑",2485,2799,""],["荣耀","荣耀X80ProMax 12+512豫月影白",2485,2799,""],["荣耀","荣耀X80ProMax 8+256豫元气橙",2025,2199,""],["荣耀","荣耀X80ProMax 8+256豫闪电红",1975,2199,""],["荣耀","荣耀X80ProMax 8+256豫玄甲黑",1965,2199,""],["荣耀","荣耀X80ProMax 8+256豫月影白",1995,2199,""],["荣耀","荣耀X80ProMax 8+512豫元气橙",2275,2499,""],["荣耀","荣耀X80ProMax 8+512豫闪电红",2265,2499,""],["荣耀","荣耀X80ProMax 8+512豫玄甲黑",2285,2499,""],["荣耀","荣耀X80ProMax 8+512豫月影白",2305,2499,""],["大疆","大疆Action5 Pro 标准版",1760,0,""],["大疆","大疆Osmo Action4标准版",1270,0,""],["大疆","大疆Osmo Action6标准版",2410,0,""],["大疆","大疆Pocket3标准",1970,0,""],["大疆","大疆Pocket3全能套装",2610,0,""],["大疆","大疆Pocket4p Vlog 套装经典黑",4040,0,""],["大疆","大疆Pocket4p 标准套装经典黑",3490,0,""],["大疆","大疆Pocket4p 标准套装珠光白",3530,0,""],["大疆","大疆Pocket4标准版",2770,0,""],["大疆","大疆Pocket4全能套装",3240,0,""],["小米","红米14C全网 4+128碧波绿",770,0,""],["小米","红米14C全网 4+128冰川银",770,0,""],["小米","红米14C全网 4+128星岩黑",770,0,""],["小米","红米14C全网 4+64碧波绿",640,0,""],["小米","红米14C全网 4+64冰川银",630,0,""],["小米","红米14C全网 4+64星岩黑",630,0,""],["小米","红米14C全网 6+128碧波绿",850,0,""],["小米","红米14C全网 6+128冰川银",860,0,""],["小米","红米14C全网 6+128星岩黑",860,0,""],["小米","红米14C全网 8+256碧波绿",950,0,""],["小米","红米14C全网 8+256冰川银",950,0,""],["小米","红米14C全网 8+256星岩黑",950,0,""],["小米","红米15R全网12+256暗影黑",1400,2299,""],["小米","红米15R全网12+256橄榄绿",1350,2299,""],["小米","红米15R全网6+128暗影黑",960,1599,""],["小米","红米15R全网6+128橄榄绿",970,1599,""],["小米","红米15R全网6+128熏衣紫",970,1599,""],["小米","红米15R全网6+128云雾白",970,1599,""],["小米","红米15R全网8+256暗影黑",1220,1899,""],["小米","红米15R全网8+256橄榄绿",1220,1899,""],["小米","红米15R全网8+256云雾白",1220,1899,""],["小米","红米17C全网 4+128黑色",775,0,""],["小米","红米17全网 4+128星岩黑",875,0,""],["小米","红米17全网 4+128羽雾白",880,0,""],["小米","红米17全网 6+128星岩黑",1065,0,""],["小米","红米K100pro 12+256G白色",3050,3999,""],["小米","红米K100pro 12+256G赤霞朱红",3160,3999,""],["小米","红米K100pro 12+256G黑色",3050,3999,""],["小米","红米K100pro 12+256G流萤追光",3060,3999,""],["小米","红米K100pro 16+256G白色",3460,4399,""],["小米","红米K100pro 16+256G赤霞朱红",3580,4399,""],["小米","红米K100pro 16+256G黑色",3400,4399,""],["小米","红米K100pro 16+256G流萤追光",3490,4399,""],["小米","红米K100pro 16+512G白色",4020,4999,""],["小米","红米K100pro 16+512G赤霞朱红",3900,4999,""],["小米","红米K100pro 16+512G黑色",3920,4999,""],["小米","红米K100pro 16+512G流萤追光",3980,4999,""],["小米","红米K100promax 12+256G白色",3400,4499,""],["小米","红米K100promax 12+256G赤霞朱红",3450,4499,""],["小米","红米K100promax 12+256G黑色",3280,4499,""],["小米","红米K100promax 12+256G蓝色",3250,4499,""],["小米","红米K100promax 12+512G白色",4100,5099,""],["小米","红米K100promax 12+512G黑色",4040,5099,""],["小米","红米K100promax 12+512G蓝色",4050,5099,""],["小米","红米K100promax 16+512G白色",4350,5499,""],["小米","红米K100promax 16+512G赤霞朱红",4250,5499,""],["小米","红米K100promax 16+512G黑色",4400,5499,""],["小米","红米K100promax 16+512G蓝色",4370,5499,""],["小米","红米K80 12+256G山恋青",2320,2499,""],["小米","红米K80 12+256G汐月蓝",2320,2499,""],["小米","红米K80 12+256G雪岩白",2320,2499,""],["小米","红米K80 12+512G雪岩白",2520,2899,""],["小米","红米K80 16+256G山恋青",2380,2699,""],["小米","红米K80 16+256G玄夜黑",2420,2699,""],["小米","红米K80 16+256G雪岩白",2390,2699,""],["小米","红米K80 16+512G山恋青",2740,3199,""],["小米","红米K80 16+512G玄夜黑",2700,3199,""],["小米","红米K80至尊 12+256冰峰蓝",2520,2599,""],["小米","红米K80至尊 12+256月岩白",2410,2599,""],["小米","红米K80至尊 12+512冰峰蓝",2810,2999,""],["小米","红米K80至尊 12+512砂岩灰",2800,2999,""],["小米","红米K80至尊 12+512月岩白",2740,2999,""],["小米","红米K80至尊 12+512云杉绿",2640,2999,""],["小米","红米K80至尊 16+256月岩白",2610,2799,""],["小米","红米K80至尊 16+512月岩白",2885,3299,""],["小米","红米K80至尊 16+512云杉绿",2870,3299,""],["小米","红米K90 12+256G白色",2610,0,""],["小米","红米K90 12+256G黑色",2600,0,""],["小米","红米K90 12+256G浅紫色",2570,2599,""],["小米","红米K90 12+256G水蓝色",2670,0,""],["小米","红米K90 12+512G白色",3010,3199,""],["小米","红米K90 12+512G黑色",2900,3199,""],["小米","红米K90 12+512G浅紫色",2940,3199,""],["小米","红米K90 16+256G白色",2740,2899,""],["小米","红米K90 16+256G水蓝色",2790,2899,""],["小米","红米K90 16+512G黑色",3560,0,""],["小米","红米K90Max 12+256G暗影黑",2560,2999,""],["小米","红米K90Max 12+256G太空银",2570,2999,""],["小米","红米K90Max 12+256G天际蓝",2520,2999,""],["小米","红米K90Max 16+256G暗影黑",2800,3499,""],["小米","红米K90Max 16+256G太空银",2820,3499,""],["小米","红米K90Max 16+256G天际蓝",2720,3499,""],["小米","红米K90Max 16+512G暗影黑",3030,3999,""],["小米","红米K90Max 16+512G太空银",3070,3999,""],["小米","红米K90ProMax 12+256G丹宁色",3830,3999,""],["小米","红米K90ProMax 12+256G流金白",4140,0,""],["小米","红米K90ProMax 12+512G丹宁色",4280,4699,""],["小米","红米K90ProMax 12+512G黑色",4230,4699,""],["小米","红米K90至尊 12+512G天际蓝",2900,3499,""],["小米","红米K90至尊 16+256G天际蓝",2710,3199,""],["小米","红米K90至尊 16+512G暗影黑",3220,3699,""],["小米","红米note14 6+128GB子夜黑",1020,1199,""],["小米","红米note14 8+128GB幻影青",1080,1299,""],["小米","红米note14 8+128GB星辉白",1075,1299,""],["小米","红米note14 8+128GB子夜黑",1075,1299,""],["小米","红米note14 8+256GB幻影青",1285,1499,""],["小米","红米note14 8+256GB星辉白",1260,1499,""],["小米","红米note14 8+256GB子夜黑",1280,1499,""],["小米","红米note14Pro 12+256GB幻影青",1400,1799,""],["小米","红米note14Pro 12+256GB镜瓷白",1395,1799,""],["小米","红米note14Pro 12+256GB暮光紫",1420,1799,""],["小米","红米note14Pro 12+256GB子夜黑",1425,1799,""],["小米","红米note14Pro 12+512GB幻影青",1575,1999,""],["小米","红米note14Pro 12+512GB镜瓷白",1540,1999,""],["小米","红米note14Pro 12+512GB暮光紫",1570,1999,""],["小米","红米note14Pro 12+512GB子夜黑",1590,1999,""],["小米","红米note14Pro 8+256GB镜瓷白",1335,1599,""],["小米","红米note14Pro 8+256GB暮光紫",1345,1599,""],["小米","红米note14Pro 8+256GB子夜黑",1335,1599,""],["小米","红米note14Pro+ 12+256GB镜瓷白",1555,1999,""],["小米","红米note14Pro+ 12+256GB星沙青",1530,1999,""],["小米","红米note14Pro+ 12+256GB子夜黑",1540,1999,""],["小米","红米note14Pro+ 12+512GB镜瓷白",1570,2199,""],["小米","红米note14Pro+ 12+512GB星沙青",1565,2199,""],["小米","红米note14Pro+ 12+512GB子夜黑",1575,2199,""],["小米","红米note14Pro+ 16+512GB镜瓷白",1660,2399,""],["小米","红米note14Pro+ 16+512GB星沙青",1680,2399,""],["小米","红米note14Pro+ 16+512GB子夜黑",1670,2399,""],["小米","红米note15 8+128GB天青蓝",1140,0,""],["小米","红米note15 8+128GB星辉白",1140,0,""],["小米","红米note15 8+128GB子夜黑",1140,0,""],["小米","红米note15 8+256GB车厘子红",1365,0,""],["小米","红米note15Pro 12+256GB云霞紫",1700,0,""],["小米","红米note15Pro 12+256GB子夜黑",1740,0,""],["小米","红米note15Pro 12+512GB天青蓝",1870,1899,""],["小米","红米note15Pro 12+512GB雪松白",1870,1899,""],["小米","红米note15Pro 12+512GB云霞紫",1890,1899,""],["小米","红米note15Pro 12+512GB子夜黑",1830,1899,""],["小米","红米note15Pro 8+256GB天青蓝",1430,1499,""],["小米","红米note15Pro 8+256GB雪松白",1430,1499,""],["小米","红米note15Pro 8+256GB云霞紫",1430,1499,""],["小米","红米note15Pro 8+256GB子夜黑",1440,1499,""],["小米","红米note15Pro+ 16+512GB雪松白",2260,2399,""],["小米","红米note15R 12+256暗影黑",1350,1899,""],["小米","红米note15R 12+256冰川白",1350,1899,""],["小米","红米note15R 12+256流沙紫",1355,1899,""],["小米","红米note15R 8+256冰川白",1230,1499,""],["小米","红米note15R 8+256流沙紫",1210,1499,""],["小米","红米note17 6+128GB黑",1080,1299,""],["小米","红米note17 6+128GB青",1110,1299,""],["小米","红米note17 6+128GB紫",1110,1299,""],["小米","红米note17 8+128GB黑",1180,1399,""],["小米","红米note17 8+128GB青",1200,1399,""],["小米","红米note17 8+128GB紫",1225,1399,""],["小米","红米note17 8+256GB黑",1360,1599,""],["小米","红米note17 8+256GB紫",1350,1599,""],["小米","红米note17pro 12+256GB白",1735,2199,""],["小米","红米note17pro 12+256GB黑",1745,2199,""],["小米","红米note17pro 12+256GB蓝",1745,2199,""],["小米","红米note17pro 8+128GB白",1420,1599,""],["小米","红米note17pro 8+128GB黑",1350,1599,""],["小米","红米note17pro 8+256GB白",1420,1899,""],["小米","红米note17pro 8+256GB黑",1410,1899,""],["小米","红米note17pro 8+256GB蓝",1410,1899,""],["小米","红米note17pro 8+256GB紫",1430,1899,""],["小米","红米R70m全网6+128星岩黑",920,0,""],["小米","红米R70m全网6+128羽雾白",925,0,""],["小米","红米R70全网6+128冷雾蓝",930,0,""],["小米","红米R70全网6+128星岩黑",930,0,""],["小米","红米R70全网6+128羽雾白",940,0,""],["小米","红米R70全网6+128羽雾紫",950,0,""],["小米","红米Turbo 5max 12+256暗夜黑",2485,0,""],["小米","红米Turbo 5max 12+256海风蓝",2465,0,""],["小米","红米Turbo 5max 12+256祥云白",2495,0,""],["小米","红米Turbo 5max 12+256阳光橙",2450,0,""],["小米","小米15 (全网通)12+256G白色",2680,4499,""],["小米","小米15 (全网通)12+256G丁香紫",2700,4499,""],["小米","小米15 (全网通)12+256G黑色",2650,4499,""],["小米","小米15 (全网通)12+256G浅草绿",2720,4499,""],["小米","小米15 (全网通)16+512G白色",3030,4999,""],["小米","小米15 (全网通)16+512G丁香紫",3100,4999,""],["小米","小米15 (全网通)16+512G黑色",3030,4999,""],["小米","小米15 (全网通)16+512G浅草绿",3120,4999,""],["小米","小米17 (全网通)12+512G白色",4180,4799,""],["小米","小米17 (全网通)12+512G冰融蓝",4080,4799,""],["小米","小米17 (全网通)12+512G黑色",4000,4799,""],["小米","小米17 (全网通)12+512G雪山粉",4100,4799,""],["小米","小米17 (全网通)16+512G冰融蓝",4320,4999,""],["小米","小米17 (全网通)16+512G黑色",4460,4999,""],["小米","小米17 (全网通)16+512G雪山粉",4480,4999,""],["小米","小米17 Pro (全网通)12+256G白色",4600,4999,""],["小米","小米17 Pro (全网通)12+256G黑色",4300,4999,""],["小米","小米17 Pro (全网通)12+256G冷烟紫",4300,4999,""],["小米","小米17 Pro (全网通)12+256G森野绿",4120,4999,""],["小米","小米17 Pro (全网通)12+512G黑色",4655,5299,""],["小米","小米17 Pro (全网通)16+1T黑色",5300,5999,""],["小米","小米17 Pro (全网通)16+512G黑色",4910,5599,""],["小米","小米17 Pro (全网通)16+512G冷烟紫",5320,5599,""],["小米","小米17 Pro (全网通)16+512G森野绿",4730,5599,""],["小米","小米17 ProMax (全网通)12+512G黑色",5150,5999,""],["小米","小米17 ProMax (全网通)12+512G冷烟紫",5500,5999,""],["小米","小米17 ProMax (全网通)12+512G森野绿",5630,5999,""],["小米","小米17 ProMax (全网通)16+1T白色",7030,0,""],["小米","小米17 ProMax (全网通)16+1T黑色",6750,6999,""],["小米","小米17 ProMax (全网通)16+512G黑色",5650,6299,""],["小米","小米17 ProMax (全网通)16+512G森野绿",5660,6299,""],["小米","小米18 Fold (全网通)12+512黑色",10800,11999,""],["小米","小米18 Fold (全网通)12+512暖金白",10880,11999,""],["小米","小米18 Fold (全网通)12+512西野红",11300,11999,""],["小米","小米18 Fold (全网通)16+1T黑色",13850,14999,""],["小米","小米18 Fold (全网通)16+1T暖金白",13900,14999,""],["小米","小米18 Fold (全网通)16+1T陶瓷特别版",15800,15999,""],["小米","小米18 Fold (全网通)16+512黑色",11800,12999,""],["小米","小米18 Fold (全网通)16+512暖金白",11750,12999,""],["小米","小米18 Fold (全网通)16+512西野红",12400,12999,""],["小米","小米平板8 8+256G WIFI版黑色",2410,2499,""],["小米","小米平板8 8+256G WIFI版蓝色",2420,2499,""],["小米","小米平板8 8+256G WIFI版绿色",2320,2499,""],["小米","小米平板8Pro 12+256G WIFI版绿色",3430,0,""],["小米","小米平板8Pro 12+256G WIFI版柔光版蓝色",3510,3599,""],["小米","小米平板8Pro 12+512G WIFI版绿色",3560,3699,""],["小米","小米平板8Pro 12+512G WIFI版柔光版蓝色",3810,3899,""],["诺基亚","诺基亚21款105双卡4g版-无售后简配黑",175,0,""],["诺基亚","诺基亚21款105双卡4g版-无售后简配蓝",175,0,""],["小度","清北道远高中学习平板",3300,0,""],["三星","三星Flip7 (F7660)折叠屏12+256原封暗影蓝",5610,0,""],["三星","三星Flip7 (F7660)折叠屏12+256原封珊瑚红",5610,0,""],["三星","三星Flip7 (F7660)折叠屏12+512原封暗影蓝",7010,0,""],["三星","三星Flip7 (F7660)折叠屏12+512原封秘影黑",7060,0,""],["三星","三星Flip8 (F7760)折叠屏12+256原封豫甜霉粉",7560,0,""],["三星","三星Flip8 (F7760)折叠屏12+256原封豫云凝白",7560,0,""],["三星","三星Flip8 (F7760)折叠屏12+512原封豫甜霉粉",8860,0,""],["三星","三星Flip8 (F7760)折叠屏12+512原封豫岩影灰",8860,0,""],["三星","三星Flip8 (F7760)折叠屏12+512原封豫云凝白",8860,0,""],["三星","三星Flip8 (F7760)折叠屏12+512原封甜莓粉",8860,0,""],["三星","三星Fold7 (F9660)折叠屏12+512原封暗影蓝",10920,0,""],["三星","三星Fold7 (F9660)折叠屏12+512原封秘影黑",11220,0,""],["三星","三星Fold7 (F9660)折叠屏12+512原封星夜银",10920,0,""],["三星","三星Fold8 (F9710)折叠屏12+256激活柔熏紫",10180,0,""],["三星","三星Fold8 (F9710)折叠屏12+256激活岩影灰",10260,0,""],["三星","三星Fold8 (F9710)折叠屏12+256激活云凝白",10220,0,""],["三星","三星Fold8 (F9710)折叠屏12+256原封豫柔熏紫",10770,0,""],["三星","三星Fold8 (F9710)折叠屏12+256原封豫岩影灰",10760,0,""],["三星","三星Fold8 (F9710)折叠屏12+256原封豫云凝白",10760,0,""],["三星","三星Fold8 (F9710)折叠屏12+512原封豫柔熏紫",12020,0,""],["三星","三星Fold8 (F9710)折叠屏12+512原封豫岩影灰",12020,0,""],["三星","三星Fold8 (F9710)折叠屏12+512原封豫云凝白",12020,0,""],["三星","三星Fold8 (F9710)折叠屏12+512原封柔熏紫",12620,0,""],["三星","三星Fold8 (F9710)折叠屏12+512原封岩影灰",12620,0,""],["三星","三星Fold8 (F9710)折叠屏16+1T原封柔熏紫",15520,0,""],["三星","三星Fold8 (F9710)折叠屏16+1T原封岩影灰",15820,0,""],["三星","三星Fold8 (F9710)折叠屏16+1T原封云凝白",15520,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256激活雅幕紫",11320,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256激活岩影灰",11410,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256激活云凝白",11510,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256原封豫雅幕紫",12120,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256原封豫岩影灰",12120,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256原封 松杉绿",12060,0,""],["三星","三星Fold8ultra (F9760)折叠屏12+256原封雅幕紫",12420,0,""],["三星","三星Fold8ultra (F9760)折叠屏12+256原封岩影灰",12410,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+256原封云凝白",12420,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+512激活岩影灰",12720,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+512激活云凝白",12860,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+512原封豫雅幕紫",13720,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+512原封豫岩影灰",13720,0,""],["三星","三星Fold8Ultra (F9760)折叠屏12+512原封豫云凝白",13720,0,""],["三星","三星Fold8Ultra (F9760)折叠屏16+1T激活雅幕紫",15420,0,""],["三星","三星S25Ultra (S9380) 12+256G原封钛辉银",6610,0,""],["三星","三星S25Ultra (S9380) 12+256G原封钛雾灰",6610,0,""],["三星","三星S25Ultra (S9380) 12+256G原封钛银蓝",6610,0,""],["三星","三星S25Ultra (S9380) 12+256G原封钛影黑",6710,0,""],["三星","三星S26+ (S9470) 12+256G全网通激活旷夜黑",5760,0,""],["三星","三星S26+ (S9470) 12+256G全网通激活浅云蓝",5760,0,""],["三星","三星S26+ (S9470) 12+256G全网通原封旷夜黑",6460,0,""],["三星","三星S26+ (S9470) 12+256G全网通原封浅云蓝",6410,0,""],["三星","三星S26+ (S9470) 12+256G全网通原封映雪白",6510,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封豫旷宇黑",7710,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封豫映雪白",7760,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封豫幽夜紫",7710,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封旷宇黑",7860,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封浅云蓝",7860,0,""],["三星","三星S26ultra (S9480) 12+256G全网通原封幽夜紫",7860,0,""],["三星","三星W26(9026)折叠屏16+512豫丹曦红",13120,0,""],["三星","三星W26(9026)折叠屏16+512豫玄曜黑",13120,0,""],["一加","一加15 12+256绝对黑",4250,5099,""],["一加","一加15 12+256原色沙丘",4150,5099,""],["一加","一加15 12+512绝对黑",4500,5699,""],["一加","一加15 12+512原色沙丘",4600,5699,""],["一加","一加15T 12+256治愈白巧",3400,4299,""],["一加","一加15T 16+256治愈白巧",4000,4599,""],["一加","一加15T 16+512纯粹可可",4400,5199,""],["一加","一加15T 16+512松弛抹茶",4400,5199,""],["一加","一加15T 16+512治愈白巧",4400,5199,""],["一加","一加Ace 6至尊 12+256GB王牌觉醒",3330,0,""],["一加","一加Ace6T 12+256GB电光紫",2750,0,""],["一加","一加Ace6T 12+256GB掠影绿",2750,0,""],["一加","一加Ace6T 12+256GB闪速黑",2550,2599,""],["一加","一加Ace6T 12+512GB闪速黑",3450,0,""],["一加","一加Turbo6 12+256独行黑",2310,0,""],["一加","一加Turbo6 12+256旷野青",2330,0,""],["一加","一加Turbo6 12+256追光银",2260,2299,""],["一加","一加Turbo6 12+512独行黑",2760,2799,""],["一加","一加Turbo6 16+512独行黑",2860,3099,""],["一加","一加Turbo6 16+512追光银",2860,3099,""],["一加","一加Turbo6V 12+256独行黑",2110,0,""],["一加","一加Turbo6V 12+256无畏蓝",2140,0,""],["一加","一加Turbo6V 12+256新星白",2110,0,""],["一加","一加Turbo6V 12+512独行黑",2360,2399,""],["一加","一加Turbo6V 8+256独行黑",1830,1899,""],["一加","一加Turbo6V 8+256无畏蓝",1830,1899,""],["一加","一加Turbo6V 8+256新星白",1810,1899,""],["一加","一加Turbo6x12+256白里挑一",1770,0,""],["一加","一加Turbo6x12+256踏青云",1790,0,""],["一加","一加Turbo6x12+256星耀黑",1790,0,""],["一加","一加Turbo6x8+128白里挑一",1300,0,""],["一加","一加Turbo6x8+128踏青云",1340,0,""],["一加","一加Turbo6x8+128星耀黑",1320,0,""],["一加","一加Turbo6x8+256白里挑一",1580,0,""],["一加","一加Turbo6xpro 12+256心想事橙",2150,2399,""],["一加","一加Turbo6xpro 8+128跃马黑",1600,1999,""],["一加","一加Turbo6xpro 8+256心想事橙",1760,2099,""]];
+
+const LS_KEY = 'quote_tool_data_v1';
+const BUILD_ID = 'd2026-11-18b';   // 内置数据版本号：本机存的数据与它不一致时自动作废，避免显示旧价
+const ADMIN_PWD = '1235987';   // 维护密码，可自行修改这里
+/* ====== 在线数据地址：填了它，每次打开会自动读取最新数据；留空则用内置数据 ====== */
+const DATA_URL_KEY = 'quote_data_url_v1';
+let DATA_URL = localStorage.getItem(DATA_URL_KEY) || '';
+const toObj = r => ({cat:String(r[0]||'未分类'), name:String(r[1]||''), price:Number(r[2])||0, msrp:Number(r[3])||0});
+const state = { data: RAW_DATA.map(toObj), q: '', cat: '全部', sort: 'default', range: 'all', shown: 200 };
+
+/* ---------- 工具 ---------- */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmt(n){ return Number(n).toLocaleString('zh-CN'); }
+function fmtP(n){ const v=Number(n)||0; return fmt(Math.abs(v-Math.round(v))<1e-9 ? v : Math.round(v)); }
+let toastTimer;
+function fallbackCopy(text, done){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; ta.style.left='-9999px';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok && done) done();
+    else toast('复制失败，请长按文本手动复制');
+  }catch(e){ toast('复制失败，请长按文本手动复制'); }
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 1900);
+}
+function norm(s){ return String(s).toLowerCase().replace(/\s+/g,''); }
+
+/* ---------- 数据装载 ---------- */
+function parseAny(text){
+  const t = String(text).trim();
+  if(t.charAt(0) === '[' || t.charAt(0) === '{'){
+    let obj = JSON.parse(t);
+    let arr = Array.isArray(obj) ? obj : (obj.rows || obj.data || []);
+    if(arr.length && typeof arr[0] === 'object' && !Array.isArray(arr[0])){
+      return arr.map(o => ({cat: String(o.cat || o['分类'] || '未分类'), name: String(o.name || o['型号'] || ''), price: Number(o.price || o['金额'] || 0), area: String(o.area || o['地区'] || '')})).filter(o => o.name);
+    }
+    return normalizeRows(arr);
+  }
+  return parseText(t);
+}
+function mirrorList(u){
+  const list = [u];
+  const m = u.match(/^https?:\/\/raw\.githubusercontent\.com\/(.+)$/i);
+  if(m){
+    const path = m[1];
+    list.push('https://gh-proxy.com/https://raw.githubusercontent.com/' + path);
+    list.push('https://ghproxy.net/https://raw.githubusercontent.com/' + path);
+    list.push('https://ghfast.top/https://raw.githubusercontent.com/' + path);
+  }
+  return list;
+}
+function loadRemote(){
+  if(!DATA_URL) return;
+  const isExcel = /\.(xlsx|xls)(\?|$)/i.test(DATA_URL);
+  const cands = mirrorList(DATA_URL);
+  const start = () => {
+    let idx = 0;
+    const tryNext = () => {
+      if(idx >= cands.length){
+        toast('在线数据读取失败（网络不通或地址无效），已使用内置数据');
+        return;
+      }
+      const base = cands[idx++];
+      const url = base + (base.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
+      fetch(url, {cache:'no-store'})
+      .then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+      .then(payload => {
+        // 自动识别真实格式：PK 开头的就是 Excel（xlsx），不看文件后缀
+        const u8 = new Uint8Array(payload);
+        const isZip = u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4B;
+        let rows;
+        if(isExcel || isZip){
+          if(typeof XLSX === 'undefined') throw new Error('Excel 解析库未加载');
+          const wb = XLSX.read(u8, {type:'array'});
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          rows = normalizeRows(XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false, defval:''}));
+        }else{
+          const txt = new TextDecoder('utf-8').decode(u8);
+          rows = parseAny(txt);
+        }
+        if(!rows || !rows.length) throw new Error('数据为空');
+        // 旧数据拦截：含已清理标记的在线数据视为过期，不覆盖内置新数据
+        if(rows.some(r => /5G|河南省|怕抓/.test(String(r.name||''))) && rows.length <= 2200) throw new Error('在线数据为旧版本，已跳过');
+        state.data = rows; state.cat = '全部'; state.sort = 'default'; state.shown = 200;
+        $('dataInfo').textContent = '数据来源：在线地址，共 ' + rows.length + ' 条（打开即同步）。';
+        renderCats(); render(); toast('已同步最新报价 ' + rows.length + ' 条');
+      })
+      .catch(err => { console.warn('在线读取失败：' + base, err); tryNext(); });
+    };
+    tryNext();
+  };
+  // 可能是 Excel 也可能是 CSV，统一等解析库就绪后再开始
+  if(typeof XLSX === 'undefined' && document.readyState !== 'complete'){
+    window.addEventListener('load', start, {once:true});
+  }else if(typeof XLSX === 'undefined'){
+    setTimeout(start, 300);
+  }else{
+    start();
+  }
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const obj = JSON.parse(raw);
+    if(!obj || !Array.isArray(obj.rows) || !obj.rows.length) return false;
+    if(obj.v !== BUILD_ID){ try{ localStorage.removeItem(LS_KEY); }catch(e){} return false; }  // 旧版本本机数据作废
+    state.data = obj.rows.map(r => ({cat:String(r[0]||''), name:String(r[1]||''), price:Number(r[2])||0, msrp:Number(r[3])||0, area:String(r[4]||'')}));
+    $('dataInfo').textContent = '数据来源：本机导入（' + obj.time + '），共 ' + state.data.length + ' 条。';
+    return true;
+  }catch(e){ return false; }
+}
+function saveLocal(rows, timeStr){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({v: BUILD_ID, time: timeStr, rows: rows.map(r=>[r.cat,r.name,r.price,r.msrp||0,r.area||''])})); }catch(e){}
+}
+function normalizeRows(arr){
+  // arr: 二维数组；支持 分类/型号/金额 三列，或 分类/型号/金额/官网价 四列
+  const out = [];
+  arr.forEach(r=>{
+    if(!r) return;
+    const cells = Array.from(r).map(v => String(v==null?'':v).trim());
+    if(cells.every(c => c==='')) return;
+    const joined = cells.join('');
+    if(/型号|金额|价格|报价|官网|指导/.test(joined) && cells.length<=5 && !/\d{3,}/.test(joined)) return; // 表头
+    // 收集所有纯数字列
+    const nums = cells.map((c,i)=>{
+      const v = c.replace(/[¥￥元,，\s]/g,'');
+      return (v!=='' && !isNaN(Number(v)) && /\d/.test(v)) ? i : -1;
+    }).filter(i=>i>-1);
+    if(!nums.length) return;
+    let priceIdx = nums[nums.length-1], msrpIdx = -1;
+    // 四列及以上且有两个数字列：倒数第二个为报价，最后一个为官网价
+    if(cells.length >= 4 && nums.length >= 2){ priceIdx = nums[nums.length-2]; msrpIdx = nums[nums.length-1]; }
+    const price = Number(cells[priceIdx].replace(/[¥￥元,，\s]/g,''));
+    const msrp = msrpIdx > -1 ? Number(cells[msrpIdx].replace(/[¥￥元,，\s]/g,'')) : 0;
+    // 排除网址、日期这类“伪型号”字段，它们不能被当成型号名
+    const isUrl = c => /^(https?:\/\/|www\.)/i.test(c);
+    const isDate = c => /^\d{4}[-/]\d{1,2}([-/]\d{1,2})?$/.test(c);
+    const isNum = c => { const v=c.replace(/[¥￥元,，\s]/g,''); return v!=='' && !isNaN(Number(v)); };
+    // 地区列：整行最后一格，且不是数字/日期/网址
+    let area = '';
+    const last = cells[cells.length-1] || '';
+    if(cells.length >= 5 && last && !isNum(last) && !isDate(last) && !isUrl(last) && last !== cells[priceIdx]){
+      area = last.replace(/\s+/g,'');
+    }
+    const names = cells.filter((c,i)=>c!=='' && i!==priceIdx && i!==msrpIdx && !isUrl(c) && !isDate(c) && c!==area);
+    if(!names.length) return;
+    // 最长的一段作为型号，前面短的作为分类
+    let name = names.reduce((a,b)=> b.length>a.length?b:a, '');
+    const others = names.filter(n=>n!==name);
+    const cat = others.length ? others[0] : '未分类';
+    const url = cells.find(isUrl) || '';
+    const launch = cells.find(isDate) || '';
+    out.push({cat: cat, name: name, price: price, msrp: (msrp && msrp > price) ? msrp : 0, url: url, launch: launch, area: area});
+  });
+  return out;
+}
+function parseText(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim()!=='');
+  const rows = lines.map(l => {
+    if(l.indexOf('\t') > -1) return l.split('\t');
+    if(l.indexOf(',') > -1) return l.split(',');
+    const m = l.match(/^(.*?)\s+(\d[\d,]*)\s*$/);
+    if(m) return [m[1], m[2]];
+    return [l];
+  });
+  return normalizeRows(rows);
+}
+function applyRows(list, srcLabel){
+  if(!list || !list.length){ toast('没有识别到有效数据，请检查格式'); return; }
+  state.data = list;
+  state.cat = '全部'; state.shown = 200;
+  const t = new Date();
+  const timeStr = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+  saveLocal(list, timeStr);
+  $('dataInfo').textContent = '数据来源：' + srcLabel + '（' + timeStr + '），共 ' + list.length + ' 条。';
+  renderCats(); render();
+  closeSheet();
+  toast('已更新 '+list.length+' 条数据');
+}
+
+/* ---------- 渲染 ---------- */
+function renderCats(){
+  const box = $('cats');
+  const seen = Array.from(new Set(state.data.map(d=>d.cat).filter(Boolean)));
+  const first = seen.filter(c => /^vivo$/i.test(c.trim()));
+  const rest = seen.filter(c => !/^vivo$/i.test(c.trim()));
+  const catList = ['全部', ...first, ...rest];
+  const label = c => (c === '全部' ? '全根通信部' : c);
+  box.innerHTML = catList.map(c=>'<button class="chip" data-cat="'+esc(c)+'">'+esc(label(c))+'</button>').join('')
+    + '<button class="sort" id="sortBtn"></button>';
+  box.querySelectorAll('.chip').forEach(b=>{
+    if(b.dataset.cat === state.cat) b.classList.add('on');
+    b.addEventListener('click', ()=>{ state.cat = b.dataset.cat; state.shown = 200; renderCats(); render(); });
+  });
+  const sb = $('sortBtn');
+  sb.textContent = state.sort === 'default' ? '默认顺序' : (state.sort === 'asc' ? '金额 ↑' : '金额 ↓');
+  sb.addEventListener('click', ()=>{
+    state.sort = state.sort === 'default' ? 'asc' : (state.sort === 'asc' ? 'desc' : 'default');
+    state.shown = 200; renderCats(); render();
+  });
+}
+function filtered(){
+  const tokens = norm(state.q).split('|').filter(Boolean);
+  const qRaw = state.q.trim();
+  const kw = qRaw.split(/\s+/).filter(Boolean);
+  let list = state.data.filter(d=>{
+    if(state.cat !== '全部' && d.cat !== state.cat) return false;
+    if(state.range === 'lt1000' && !(d.price < 1000)) return false;
+    if(state.range === 'mid' && !(d.price >= 1000 && d.price <= 2000)) return false;
+    if(state.range === 'mid' && !(d.price >= 2000 && d.price <= 3000)) return false;
+    if(state.range === 'mid' && !(d.price >= 3000 && d.price <= 4000)) return false;
+    if(state.range === 'mid' && !(d.price >= 4000 && d.price <= 5000)) return false;
+    if(state.range === 'gt5000' && !(d.price > 5000)) return false;
+    if(!kw.length) return true;
+    const hay = norm(d.name) + '|' + norm(d.cat);
+    return kw.every(k => hay.indexOf(norm(k)) > -1);
+  });
+  if(state.sort === 'asc') list = list.slice().sort((a,b)=>a.price-b.price);
+  if(state.sort === 'desc') list = list.slice().sort((a,b)=>b.price-a.price);
+  return list;
+}
+function highlight(text, kw){
+  if(!kw.length) return esc(text);
+  let html = esc(text);
+  kw.forEach(k=>{
+    const safe = esc(k).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    html = html.replace(new RegExp(safe, 'gi'), m => '<mark>'+m+'</mark>');
+  });
+  return html;
+}
+function render(){
+  const kw = state.q.trim().split(/\s+/).filter(Boolean);
+  const list = filtered();
+  $('total').textContent = list.length ? list.length + ' 条' : '无结果';
+  $('subline').textContent = state.q.trim() ? '搜索：' + state.q.trim() : '';
+  // 行情提示卡片：匹配款数 + 当前结果最低价
+  const hint = $('priceHint');
+  if(state.q.trim() && list.length){
+    const min = list.reduce((a,b)=>b.price<a.price?b:a);
+    $('hcTop').textContent = '已匹配 ' + list.length + ' 款型号';
+    if(min.msrp){ $('hcRef').style.display='inline'; $('hcRef').textContent = '官网价 ¥' + fmt(min.msrp); }
+    else{ $('hcRef').style.display='none'; }
+    $('hcPrice').textContent = '¥' + fmtP(min.price);
+    $('hcModel').textContent = min.name;
+    // 与官网价对比：省多少 + 折几折
+    const saveEl = $('hcSave');
+    if(min.msrp){
+      const gap = min.msrp - min.price;
+      const disc = (min.price / min.msrp * 10).toFixed(1);
+      saveEl.style.display = 'block';
+      saveEl.innerHTML = '本店价较官网立省 <b>¥' + fmtP(gap) + '</b>（约 ' + disc + ' 折）';
+    }else{
+      saveEl.style.display = 'none';
+    }
+    hint.classList.add('show');
+  }else{
+    hint.classList.remove('show');
+  }
+  const view = list.slice(0, state.shown);
+  const box = $('list');
+  if(!view.length){
+    box.innerHTML = '<div class="empty">没找到匹配的型号<br><span style="font-size:12.5px">试试减少关键词，或点击底部「更新数据」导入新报价表</span></div>';
+  }else{
+    box.innerHTML = view.map((d,i) =>
+      '<div class="item" data-i="'+i+'">'+
+        '<div class="item-main"><div class="model">'+highlight(d.name, kw)+'</div>'+
+        '<div class="cat">'+esc(d.cat || '未分类')+(d.area ? ' · ' + esc(d.area) : '')+'</div></div>'+
+        '<div class="price">'+(d.msrp ? '<span class="was">'+fmtP(d.msrp)+'</span>' : '')+fmtP(d.price)+'<small>元</small></div>'+
+      '</div>').join('');
+    box.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const idx = Number(el.dataset.i);
+        const d = view[idx];
+        if(!d) return;
+        const text = d.name + ' ' + fmtP(d.price) + '元';
+        const done = ()=>toast('已复制：' + d.name);
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text, done));
+        }else{ fallbackCopy(text, done); }
+      });
+    });
+  }
+  const more = $('more');
+  if(list.length > view.length){
+    more.style.display = 'block';
+    more.textContent = '已显示前 ' + view.length + ' 条，继续滚动查看请点这里';
+    more.onclick = ()=>{ state.shown += 300; render(); };
+  }else{
+    more.style.display = 'none';
+  }
+  $('clearBtn').classList.toggle('show', !!state.q);
+  renderHist();
+}
+
+/* ---------- 最近查询记录 ---------- */
+const HIST_KEY = 'quote_history_v1';
+function getHist(){ try{ return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); }catch(e){ return []; } }
+function pushHist(q){
+  q = (q || '').trim(); if(q.length < 2) return;
+  let h = getHist().filter(x => x !== q && !(q.startsWith(x) && x.length < q.length) && !(x.startsWith(q) && q.length < x.length));
+  h.unshift(q); h = h.slice(0, 10);
+  try{ localStorage.setItem(HIST_KEY, JSON.stringify(h)); }catch(e){}
+  renderHist();
+}
+function getClientName(){
+  // 优先用链接里带的客户标识 ?c=张三，其次用上次记住的，最后用随机码
+  let name = '';
+  try{
+    const c = new URLSearchParams(location.search).get('c');
+    if(c){ name = decodeURIComponent(c).trim().slice(0,20); try{ localStorage.setItem('quote_client_name_v1', name); }catch(e){} }
+  }catch(e){}
+  if(!name){ try{ name = localStorage.getItem('quote_client_name_v1') || ''; }catch(e){} }
+  if(name) return name;
+  let tag = '';
+  try{ tag = localStorage.getItem('quote_client_tag') || ''; if(!tag){ tag = 'm' + Math.random().toString(36).slice(2,8); localStorage.setItem('quote_client_tag', tag); } }catch(e){}
+  return tag || 'na';
+}
+function reportSearch(q){
+  q = (q || '').trim(); if(q.length < 2) return;
+  // 同一台手机 8 秒内只报一次，避免刷屏
+  let last = 0; try{ last = Number(localStorage.getItem('quote_report_ts') || 0); }catch(e){}
+  if(Date.now() - last < 8000) return;
+  const tag = getClientName();
+  const d = new Date();
+  const bj = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  const text = '【报价查询】\n客户：' + tag + '\n搜索：' + q + '\n时间：' + bj;
+  try{ localStorage.setItem('quote_report_ts', String(Date.now())); }catch(e){}
+  // 方式一：飞书群机器人（国内可通）
+  if(FEISHU_HOOK){
+    fetch(FEISHU_HOOK, {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({msg_type:'text', content:{text: text}})}).catch(()=>{});
+    return;
+  }
+  // 方式二：自建 Worker（可选）
+  if(STAT_URL){
+    const body = JSON.stringify({q:q, t:new Date().toISOString(), tag:tag, n:(navigator.userAgent||'').slice(0,120)});
+    try{
+      if(navigator.sendBeacon){ navigator.sendBeacon(STAT_URL, new Blob([body], {type:'text/plain'})); }
+      else{ fetch(STAT_URL, {method:'POST', body:body, mode:'no-cors', keepalive:true}).catch(()=>{}); }
+    }catch(e){}
+  }
+}
+function renderHist(){
+  const el = $('hist'); if(!el) return;
+  const h = getHist();
+  el.innerHTML = '';
+  if(state.q.trim() || !h.length){ el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const lb = document.createElement('span'); lb.className = 'hist-lb'; lb.textContent = '最近查询';
+  el.appendChild(lb);
+  h.forEach(q => {
+    const b = document.createElement('button'); b.className = 'hist-chip'; b.textContent = q;
+    b.addEventListener('click', ()=>{ $('q').value = q; state.q = q; state.shown = 200; render(); });
+    el.appendChild(b);
+  });
+  const c = document.createElement('button'); c.className = 'hist-clear'; c.textContent = '清空记录';
+  c.addEventListener('click', ()=>{ try{ localStorage.removeItem(HIST_KEY); }catch(e){} renderHist(); toast('已清空查询记录'); });
+  el.appendChild(c);
+}
+
+/* ---------- 事件 ---------- */
+let timer, histTimer;
+$('q').addEventListener('input', e=>{
+  clearTimeout(timer);
+  timer = setTimeout(()=>{ state.q = e.target.value; state.shown = 200; render(); }, 120);
+  clearTimeout(histTimer);
+  histTimer = setTimeout(()=>{ if(filtered().length && state.q.trim().length >= 2){ pushHist(state.q); reportSearch(state.q); } }, 3000);
+});
+$('clearBtn').addEventListener('click', ()=>{ $('q').value=''; state.q=''; $('q').focus(); render(); });
+  $('rangeSel').addEventListener('change', e=>{ state.range=e.target.value; state.shown=200; render(); });
+
+function openSheet(){ $('sheet').classList.add('show'); $('urlInput').value = DATA_URL || ''; }
+function closeSheet(){ $('sheet').classList.remove('show'); }
+let unlocked = false;
+$('updateBtn').addEventListener('click', ()=>{
+  if(unlocked){ openSheet(); return; }
+  const pwd = prompt('请输入维护密码（仅维护人员需要）：');
+  if(pwd === null) return;
+  if(pwd.trim() !== ADMIN_PWD){ toast('密码错误，无法更新数据'); return; }
+  unlocked = true;
+  openSheet();
+});
+$('sheet').addEventListener('click', e=>{ if(e.target.hasAttribute('data-close')) closeSheet(); });
+$('shareSheet').addEventListener('click', e=>{ if(e.target.hasAttribute('data-close')) $('shareSheet').classList.remove('show'); });
+
+const SHARE_URL = 'https://ucn16o41aido.doubao.link/app/app_17hm9uybmx6';
+$('shareBtn').addEventListener('click', async ()=>{
+  $('shareUrl').value = SHARE_URL;
+  $('shareSheet').classList.add('show');
+  try{ await navigator.clipboard.writeText(SHARE_URL); toast('链接已复制，去微信粘贴发送'); }catch(e){}
+});
+$('copyLinkBtn').addEventListener('click', async ()=>{
+  const v = $('shareUrl').value;
+  try{ await navigator.clipboard.writeText(v); toast('已复制') }catch(e){ toast('复制失败，请长按输入框手动复制') }
+  $('shareUrl').select();
+});
+
+$('saveUrlBtn').addEventListener('click', ()=>{
+  const v = $('urlInput').value.trim();
+  if(!/^https?:\/\//i.test(v)){ toast('请填写 http 或 https 开头的完整网址'); return; }
+  if(/github\.com\/[^/]+\/[^/]+\/?$/.test(v) || /github\.com\/[^/]+\/[^/]+\/(tree|blob)/.test(v)){
+    toast('这是仓库网页地址，不是文件直链。请打开文件后点「Raw/原始文件」，复制地址栏网址'); return;
+  }
+  DATA_URL = v;
+  try{ localStorage.setItem(DATA_URL_KEY, v); }catch(e){}
+  toast('已保存地址，正在同步…');
+  loadRemote();
+});
+const OFFICIAL_URL = 'https://raw.githubusercontent.com/ququangen/zhineng/main/data.csv';
+$('fillUrlBtn').addEventListener('click', ()=>{
+  $('urlInput').value = OFFICIAL_URL;
+  DATA_URL = OFFICIAL_URL;
+  try{ localStorage.setItem(DATA_URL_KEY, OFFICIAL_URL); }catch(e){}
+  toast('已填入官方地址，正在同步…');
+  loadRemote();
+});
+$('clearUrlBtn').addEventListener('click', ()=>{
+  DATA_URL = ''; $('urlInput').value = '';
+  try{ localStorage.removeItem(DATA_URL_KEY); }catch(e){}
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  state.data = RAW_DATA.map(toObj); state.cat='全部'; state.sort='default'; state.shown=200;
+  $('dataInfo').textContent = '数据来源：内置报价（2026-11-11）。';
+  renderCats(); render();
+  toast('已清除在线地址，并恢复为内置数据');
+});
+$('applyBtn').addEventListener('click', ()=>{
+  const text = $('pasteArea').value.trim();
+  if(!text){ toast('请先粘贴内容'); return; }
+  applyRows(parseText(text), '粘贴导入');
+});
+$('resetBtn').addEventListener('click', ()=>{
+  localStorage.removeItem(LS_KEY);
+  state.data = RAW_DATA.map(toObj); state.cat = '全部'; state.sort='default'; state.shown = 200;
+  $('pasteArea').value = '';
+  $('dataInfo').textContent = '数据来源：内置报价（2026-11-11）。';
+  renderCats(); render(); closeSheet(); toast('已恢复内置数据');
+});
+$('fileInput').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const isXlsx = /\.(xlsx|xls)$/i.test(f.name);
+  if(isXlsx){
+    if(typeof XLSX === 'undefined'){ toast('Excel 解析库未加载（需联网），请改用粘贴方式'); return; }
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      try{
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const arr = XLSX.utils.sheet_to_json(ws, {header:1, blankrows:false, defval:''});
+        applyRows(normalizeRows(arr), f.name);
+      }catch(err){ toast('文件解析失败：' + err.message); }
+    };
+    reader.readAsArrayBuffer(f);
+  }else{
+    const reader = new FileReader();
+    reader.onload = ev=>{ applyRows(parseText(ev.target.result), f.name); };
+    reader.readAsText(f, 'UTF-8');
+  }
+});
+$('copyBtn').addEventListener('click', ()=>{
+  const list = filtered().slice(0, 500);
+  if(!list.length){ toast('没有可复制的结果'); return; }
+  const text = list.map(d=>d.name + '\t' + d.price).join('\n');
+  navigator.clipboard && navigator.clipboard.writeText(text)
+    .then(()=>toast('已复制 ' + list.length + ' 条（型号 + 金额）'))
+    .catch(()=>toast('复制失败，请长按选择手动复制'));
+});
+
+/* ---------- 访问口令 ---------- */
+/* ====== 搜索上报（可选）：填了地址后，别人搜什么会静默发到你的表格，用户可以无感 ====== */
+const STAT_URL = '';
+const FEISHU_HOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/b7331dd3-d887-40e9-bf30-342a2e374be1';   // 飞书群机器人 webhook，填了就会直接推消息
+const GATE_ON = false;                // 首页查询口令开关：false=不拦，直接看报价；true=需口令
+const GATE_KEY = 'quote_gate_v1';
+const VISIT_PWD = '1235987';      // 查询口令，可自行修改
+const GATE_MAX = 3;               // 允许连续输错次数
+const GATE_LOCK_MS = 10*60*1000;  // 锁定时长：10 分钟
+
+function gateRead(){ try{ return JSON.parse(localStorage.getItem(GATE_KEY)) || {ok:false,fails:0,lock:0}; }catch(e){ return {ok:false,fails:0,lock:0}; } }
+function gateWrite(o){ try{ localStorage.setItem(GATE_KEY, JSON.stringify(o)); }catch(e){} }
+
+function startApp(){
+  loadLocal();
+  renderCats();
+  render();
+  loadRemote();
+}
+
+function gateBoot(){
+  const box = $('gate');
+  if(!GATE_ON){ box.classList.remove('on'); box.style.display='none'; startApp(); return; }
+  const st = gateRead();
+  if(st.ok){ box.classList.remove('on'); box.style.display='none'; startApp(); return; }
+
+  const err = $('gateErr');
+  const note = $('gateNote');
+  const inp = $('gatePwd');
+  const btn = $('gateBtn');
+
+  function lockCountdown(until){
+    inp.disabled = true; btn.disabled = true;
+    $('gateTitle').textContent = '已锁定';
+    $('gateSub').textContent = '输错次数过多，暂不可查询';
+    btn.style.opacity = '.5';
+    const tick = ()=>{
+      const left = until - Date.now();
+      if(left <= 0){
+        clearInterval(timer);
+        const s2 = gateRead(); s2.fails = 0; s2.lock = 0; gateWrite(s2);
+        inp.disabled = false; btn.disabled = false; btn.style.opacity = '1';
+        $('gateTitle').textContent = '请输入查询口令';
+        $('gateSub').textContent = '口令由发给你的业务员提供';
+        err.textContent = ''; note.textContent = '连续输错 3 次将锁定 10 分钟';
+        return;
+      }
+      const m = Math.floor(left/60000), sec = Math.floor((left%60000)/1000);
+      err.textContent = '请 ' + m + ' 分 ' + String(sec).padStart(2,'0') + ' 秒后再试';
+    };
+    const timer = setInterval(tick, 1000); tick();
+  }
+
+  if(st.lock && Date.now() < st.lock){ lockCountdown(st.lock); return; }
+
+  btn.onclick = ()=>{
+    const v = inp.value.trim();
+    if(v === VISIT_PWD){
+      gateWrite({ok:true, fails:0, lock:0});
+      box.classList.remove('on'); box.style.display='none';
+      startApp();
+      return;
+    }
+    const s2 = gateRead();
+    s2.fails = (s2.fails || 0) + 1;
+    if(s2.fails >= GATE_MAX){
+      s2.lock = Date.now() + GATE_LOCK_MS; s2.fails = 0;
+      gateWrite(s2);
+      err.textContent = '已输错 ' + GATE_MAX + ' 次，锁定 10 分钟';
+      lockCountdown(s2.lock);
+      return;
+    }
+    gateWrite(s2);
+    err.textContent = '口令不对，还可以再试 ' + (GATE_MAX - s2.fails) + ' 次';
+    inp.value = ''; inp.focus();
+  };
+  inp.addEventListener('keydown', e => { if(e.key === 'Enter') btn.click(); });
+}
+
+gateBoot();
+</script>
+</body>
+</html>
